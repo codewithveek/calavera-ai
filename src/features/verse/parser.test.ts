@@ -1,0 +1,38 @@
+import { describe, expect, it } from '@jest/globals';
+
+import { parseVerseOutput, toStanzas } from './parser';
+
+describe('parseVerseOutput', () => {
+  it('treats a partially streamed scratchpad tag as planning', () => {
+    expect(parseVerseOutput('<rim')).toEqual({ planning: true, notes: '', poem: '' });
+  });
+
+  it('exposes rhyme notes while the scratchpad is open', () => {
+    expect(parseVerseOutput('<rimas>cantar/altar')).toEqual({ planning: true, notes: 'cantar/altar', poem: '' });
+  });
+
+  it('hides the scratchpad and cleans markdown from the poem', () => {
+    const parsed = parseVerseOutput('<rimas>a/b</rimas>\n**Llegó la Catrina un día**\n"no me voy"');
+    expect(parsed).toEqual({ planning: false, notes: 'a/b', poem: 'Llegó la Catrina un día\nno me voy' });
+  });
+
+  it('accepts output when the model skips the scratchpad', () => {
+    expect(parseVerseOutput('Llegó la Muerte\ncon prisa').poem).toBe('Llegó la Muerte\ncon prisa');
+  });
+});
+
+describe('toStanzas', () => {
+  it('splits on blank lines', () => {
+    expect(toStanzas('a\nb\n\nc\nd')).toEqual([
+      ['a', 'b'],
+      ['c', 'd'],
+    ]);
+  });
+
+  it('falls back to quatrains when stanza breaks are missing', () => {
+    expect(toStanzas('a\nb\nc\nd\ne\nf\ng\nh')).toEqual([
+      ['a', 'b', 'c', 'd'],
+      ['e', 'f', 'g', 'h'],
+    ]);
+  });
+});
