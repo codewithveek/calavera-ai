@@ -1,5 +1,7 @@
 import { getDatabase } from '@/db/database';
 
+import type { VerseLanguage } from '@/features/verse/languages';
+
 import type { NewTribute, Tribute } from './types';
 
 interface TributeRow {
@@ -11,6 +13,8 @@ interface TributeRow {
   tone: number;
   figure: string;
   poem: string;
+  language: VerseLanguage;
+  translation: string | null;
   model_label: string;
   tokens_per_second: number | null;
   created_at: number;
@@ -31,6 +35,8 @@ const toTribute = (row: TributeRow): Tribute => ({
   tone: row.tone,
   figure: row.figure,
   poem: row.poem,
+  language: row.language,
+  translation: row.translation,
   modelLabel: row.model_label,
   tokensPerSecond: row.tokens_per_second,
   createdAt: row.created_at,
@@ -39,12 +45,14 @@ const toTribute = (row: TributeRow): Tribute => ({
 export async function insertTribute(tribute: NewTribute): Promise<number> {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO tributes (profile_id, tone, figure, poem, model_label, tokens_per_second, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO tributes (profile_id, tone, figure, poem, language, translation, model_label, tokens_per_second, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     tribute.profileId,
     tribute.tone,
     tribute.figure,
     tribute.poem,
+    tribute.language,
+    tribute.translation,
     tribute.modelLabel,
     tribute.tokensPerSecond,
     Date.now(),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from '@jest/globals';
 
-import { parseVerseOutput, toStanzas } from './parser';
+import { cleanTranslation, parseVerseOutput, toStanzas } from './parser';
 
 describe('parseVerseOutput', () => {
   it('treats a partially streamed scratchpad tag as planning', () => {
@@ -46,5 +46,19 @@ describe('toStanzas', () => {
       ['a', 'b', 'c', 'd'],
       ['e', 'f', 'g', 'h'],
     ]);
+  });
+});
+
+describe('cleanTranslation', () => {
+  it('drops a lead-in line and markdown', () => {
+    expect(cleanTranslation("Here's the English translation:\n**Grandma Rosa, La Catrina came**\nwith a wink")).toBe(
+      'Grandma Rosa, La Catrina came\nwith a wink',
+    );
+  });
+
+  it('keeps a translation that starts straight away', () => {
+    expect(cleanTranslation('Death came knocking at the door\n\nShe laughed')).toBe(
+      'Death came knocking at the door\n\nShe laughed',
+    );
   });
 });

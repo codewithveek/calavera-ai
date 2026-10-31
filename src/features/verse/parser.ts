@@ -75,3 +75,8 @@ export function toStanzas(poem: string): string[][] {
   }
   return stanzas;
 }
+
+/** A streamed translation without markdown, quotes or a "Here is the translation:" lead-in. */
+export function cleanTranslation(raw: string): string {
+  return cleanPoem(raw.replace(/^\s*(?:here(?:'s| is)[^\n]*|(?:english )?translation)\s*:?\s*\n/i, ''));
+}

@@ -1,8 +1,18 @@
 import * as Speech from 'expo-speech';
 import { useCallback, useEffect, useState } from 'react';
 
-/** Recites a poem with the device's offline text-to-speech engine. */
-export function useRecitation(text: string, language = 'es-MX') {
+export interface RecitationPart {
+  text: string;
+  /** BCP-47 voice, e.g. "es-MX". */
+  language: string;
+}
+
+/**
+ * Recites a poem (and its translation) with the device's offline
+ * text-to-speech engine, each part in its own voice. Utterances queue on
+ * Android, so the parts play one after another.
+ */
+export function useRecitation(parts: readonly RecitationPart[]) {
   const [speaking, setSpeaking] = useState(false);
 
   const stop = useCallback(() => {
@@ -17,8 +27,18 @@ export function useRecitation(text: string, language = 'es-MX') {
     }
     setSpeaking(true);
     const done = () => setSpeaking(false);
-    Speech.speak(text, { language, rate: 0.9, pitch: 1, onDone: done, onStopped: done, onError: done });
-  }, [language, speaking, stop, text]);
+    parts.forEach((part, index) => {
+      const isLast = index === parts.length - 1;
+      Speech.speak(part.text, {
+        language: part.language,
+        rate: 0.9,
+        pitch: 1,
+        onDone: isLast ? done : undefined,
+        onStopped: done,
+        onError: done,
+      });
+    });
+  }, [parts, speaking, stop]);
 
   useEffect(
     () => () => {

@@ -21,14 +21,17 @@ export function useCalaveritaGenerator() {
       verseActions.start();
       // Tokens arrive far faster than the screen needs; render ~12 times a second.
       const tokens = createTextBatcher(verseActions.append, 80);
+      const translationTokens = createTextBatcher(verseActions.appendTranslation, 80);
       try {
         return await generateCalaverita(pack, input, {
           onPhase: verseActions.setPhase,
           onMemoriesUsed: verseActions.setMemoriesUsed,
           onToken: tokens.push,
+          onTranslationToken: translationTokens.push,
         });
       } finally {
         tokens.flushNow();
+        translationTokens.flushNow();
       }
     },
     onSuccess: async (tributeId) => {

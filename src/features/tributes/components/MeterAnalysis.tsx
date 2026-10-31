@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
-import { countLineSyllables, meterVerdict, OCTOSYLLABLE } from '@/features/verse/meter';
+import type { VerseLanguage } from '@/features/verse/languages';
+import { countSyllables, meterVerdict, OCTOSYLLABLE } from '@/features/verse/meter';
 import { toStanzas } from '@/features/verse/parser';
 import { colors, radii, spacing } from '@/shared/theme/tokens';
 import { AppText } from '@/shared/ui/AppText';
@@ -9,18 +10,18 @@ import { Card } from '@/shared/ui/Card';
 const VERDICT_COLOR = { exact: colors.success, close: colors.candle, off: colors.danger } as const;
 
 /** Deterministic métrica check of the model's verse: counts poetic syllables per line. */
-export function MeterAnalysis({ poem }: { poem: string }) {
+export function MeterAnalysis({ poem, language }: { poem: string; language: VerseLanguage }) {
   const lines = toStanzas(poem)
     .flat()
     .map((line) => {
-      const syllables = countLineSyllables(line);
+      const syllables = countSyllables(line, language);
       return { line, syllables, verdict: meterVerdict(syllables) };
     });
   const onMeter = lines.filter((line) => line.verdict !== 'off').length;
 
   return (
     <Card>
-      <AppText variant="heading">Métrica</AppText>
+      <AppText variant="heading">Métrica · Rhythm check</AppText>
       <AppText tone="muted">
         {onMeter} of {lines.length} lines have the classic {OCTOSYLLABLE}-syllable beat of a calaverita, give or take
         one.

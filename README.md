@@ -31,8 +31,8 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 | **2. El Altar Digital** | A three-tier ofrenda (Cielo · Tierra · Inframundo) built from your scans. Empty slots open the Soul Mirror. |
 | **3. Soul Mirror** | A vision-language model names the heirloom. A cultural knowledge base decides its tier and meaning, and the scan becomes a memory. |
 | **4. Memory Archive** | Stories are chunked, embedded and stored in sqlite-vec. *Ask the archive* runs semantic search by meaning. |
-| **5. Calaveritas** | Pick a loved one, a tone (tender ↔ satirical) and a death figure. Retrieved memories ground a streamed poem. |
-| **6. Tribute** | Parchment card, Spanish recitation (system TTS), share or save as PNG, and a per-line octosyllable meter analysis. |
+| **5. Calaveritas** | Pick a loved one, a language (Spanish, English, or the Spanish original with an English translation), a tone (tender ↔ satirical) and a death figure. Retrieved memories ground a streamed poem; the translation streams in as a second pass. |
+| **6. Tribute** | Bilingual parchment card, recitation in a Mexican Spanish and/or English voice (system TTS), share or save as PNG, and a per-line rhythm check (Spanish métrica with sinalefa, or an English syllable estimate). |
 
 ## Models (all open weights, GGUF via llama.cpp)
 

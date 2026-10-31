@@ -1,3 +1,5 @@
+import type { VerseLanguage } from './languages';
+
 /**
  * Spanish poetic syllable counter (métrica), used to check octosílabos.
  *
@@ -90,4 +92,26 @@ export const OCTOSYLLABLE = 8;
 export function meterVerdict(syllables: number): 'exact' | 'close' | 'off' {
   if (syllables === OCTOSYLLABLE) return 'exact';
   return Math.abs(syllables - OCTOSYLLABLE) === 1 ? 'close' : 'off';
+}
+
+/**
+ * English syllables, estimated from vowel groups (a silent final "e", "es" or
+ * "ed" is dropped). An approximation, enough to show whether a line keeps a
+ * calaverita's eight-syllable beat.
+ */
+export function countEnglishWordSyllables(word: string): number {
+  let letters = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (!letters) return 0;
+  if (letters.length <= 3) return 1;
+  letters = letters.replace(/(?:[^laeiouy]es|[^laeiouy]ed|[^laeiouy]e)$/, '').replace(/^y/, '');
+  return Math.max(1, letters.match(/[aeiouy]{1,2}/g)?.length ?? 1);
+}
+
+export function countEnglishLineSyllables(line: string): number {
+  return line.split(/\s+/).reduce((total, word) => total + countEnglishWordSyllables(word), 0);
+}
+
+/** Syllables in one line of a poem written in `language`. */
+export function countSyllables(line: string, language: VerseLanguage): number {
+  return language === 'en' ? countEnglishLineSyllables(line) : countLineSyllables(line);
 }

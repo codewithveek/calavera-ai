@@ -8,11 +8,13 @@ interface VerseSession {
   phase: VersePhase;
   /** Raw streamed model output, including the hidden rhyme scratchpad. */
   raw: string;
+  /** Raw streamed English translation (the "Spanish + English" second pass). */
+  translation: string;
   memoriesUsed: number;
   error: string | null;
 }
 
-const INITIAL: VerseSession = { phase: 'idle', raw: '', memoriesUsed: 0, error: null };
+const INITIAL: VerseSession = { phase: 'idle', raw: '', translation: '', memoriesUsed: 0, error: null };
 
 /** Streaming state lives outside React Query so tokens never churn the cache. */
 export const useVerseSession = create<VerseSession>()(() => INITIAL);
@@ -29,6 +31,9 @@ export const verseActions = {
   },
   append(chunk: string) {
     useVerseSession.setState((state) => ({ raw: state.raw + chunk }));
+  },
+  appendTranslation(chunk: string) {
+    useVerseSession.setState((state) => ({ translation: state.translation + chunk }));
   },
   fail(error: string) {
     useVerseSession.setState({ phase: 'error', error });

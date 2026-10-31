@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useRef, type ComponentRef } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
+import { SPEECH_LOCALE } from '@/features/verse/languages';
 import { useGoBack } from '@/shared/hooks/useGoBack';
 import { toErrorMessage } from '@/shared/lib/errors';
 import { haptics } from '@/shared/lib/haptics';
@@ -33,7 +34,14 @@ function TributeView({ tribute }: { tribute: Tribute }) {
   const router = useRouter();
   const goBack = useGoBack();
   const cardRef = useRef<ComponentRef<typeof View>>(null);
-  const recitation = useRecitation(tribute.poem);
+  const recitation = useRecitation(
+    tribute.translation
+      ? [
+          { text: tribute.poem, language: SPEECH_LOCALE[tribute.language] },
+          { text: tribute.translation, language: SPEECH_LOCALE.en },
+        ]
+      : [{ text: tribute.poem, language: SPEECH_LOCALE[tribute.language] }],
+  );
   const share = useMutation({ mutationFn: () => shareCard(cardRef, tribute.profileName) });
   const save = useMutation({ mutationFn: () => saveCardToGallery(cardRef, tribute.profileName), onSuccess: haptics.success });
   const remove = useDeleteTribute();
@@ -77,7 +85,7 @@ function TributeView({ tribute }: { tribute: Tribute }) {
         onPress={() => router.push({ pathname: '/verse', params: { profileId: String(tribute.profileId) } })}
       />
 
-      <MeterAnalysis poem={tribute.poem} />
+      <MeterAnalysis poem={tribute.poem} language={tribute.language} />
 
       <Button label="Delete this calaverita" variant="ghost" onPress={confirmDelete} />
     </Screen>

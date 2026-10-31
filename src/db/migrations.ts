@@ -71,6 +71,13 @@ const MIGRATIONS: readonly Migration[] = [
       CREATE INDEX idx_tributes_profile ON tributes(profile_id, created_at DESC);
     `);
   },
+  // v2: poems in Spanish, English or both. Earlier tributes were all Spanish.
+  async (db) => {
+    await db.execAsync(`
+      ALTER TABLE tributes ADD COLUMN language TEXT NOT NULL DEFAULT 'es' CHECK (language IN ('es', 'en'));
+      ALTER TABLE tributes ADD COLUMN translation TEXT;
+    `);
+  },
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

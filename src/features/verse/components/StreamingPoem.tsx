@@ -4,7 +4,7 @@ import { ModelLoadingNotice } from '@/features/engine/ModelLoadingNotice';
 import { colors, radii, spacing } from '@/shared/theme/tokens';
 import { AppText } from '@/shared/ui/AppText';
 
-import { parseVerseOutput } from '../parser';
+import { cleanTranslation, parseVerseOutput } from '../parser';
 import { useVerseSession } from '../verseStore';
 
 /**
@@ -14,6 +14,7 @@ import { useVerseSession } from '../verseStore';
 export function StreamingPoem() {
   const phase = useVerseSession((state) => state.phase);
   const raw = useVerseSession((state) => state.raw);
+  const translation = useVerseSession((state) => state.translation);
   const memoriesUsed = useVerseSession((state) => state.memoriesUsed);
   const error = useVerseSession((state) => state.error);
 
@@ -32,7 +33,9 @@ export function StreamingPoem() {
       ? 'Consulting the memory archive…'
       : phase === 'saving'
         ? 'Inscribing the tribute…'
-        : planning
+        : phase === 'translating'
+          ? 'Translating into English…'
+          : planning
           ? 'Finding rhymes…'
           : poem
             ? 'Writing on this phone…'
@@ -46,7 +49,7 @@ export function StreamingPoem() {
       <ModelLoadingNotice />
       {planning && notes ? (
         <AppText variant="caption" tone="muted" numberOfLines={2}>
-          Rimas: {notes}
+          Rhymes (rimas): {notes}
         </AppText>
       ) : null}
       {poem ? (
@@ -54,6 +57,17 @@ export function StreamingPoem() {
           {poem}
           {phase === 'writing' ? <AppText tone="accent">▍</AppText> : null}
         </AppText>
+      ) : null}
+      {phase === 'translating' || translation ? (
+        <View style={styles.translation}>
+          <AppText variant="label" tone="muted">
+            In English
+          </AppText>
+          <AppText serif style={[styles.poem, styles.translated]}>
+            {cleanTranslation(translation)}
+            {phase === 'translating' ? <AppText tone="accent">▍</AppText> : null}
+          </AppText>
+        </View>
       ) : null}
     </View>
   );
@@ -69,4 +83,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   poem: { fontSize: 18, lineHeight: 28 },
+  translation: { gap: spacing.xs, marginTop: spacing.sm },
+  translated: { fontStyle: 'italic', color: colors.boneMuted },
 });

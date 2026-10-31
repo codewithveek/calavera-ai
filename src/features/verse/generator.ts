@@ -6,8 +6,9 @@ import { getProfile } from '@/features/profiles/repo';
 import { insertTribute } from '@/features/tributes/repo';
 import { UserFacingError } from '@/shared/lib/errors';
 
-import { parseVerseOutput, toStanzas } from './parser';
-import { buildCalaveritaPrompt } from './prompt';
+import { writtenIn, type PoemLanguage } from './languages';
+import { cleanTranslation, parseVerseOutput, toStanzas } from './parser';
+import { buildCalaveritaPrompt, buildTranslationPrompt } from './prompt';
 import { figureName, toneAt, type DeathFigureId } from './tones';
 
 export interface GenerateInput {
@@ -15,20 +16,23 @@ export interface GenerateInput {
   toneLevel: number;
   figureId: DeathFigureId;
   focus: string;
+  language: PoemLanguage;
 }
 
-export type GeneratePhase = 'retrieving' | 'writing' | 'saving';
+export type GeneratePhase = 'retrieving' | 'writing' | 'translating' | 'saving';
 
 export interface GenerateCallbacks {
   onPhase: (phase: GeneratePhase) => void;
   onMemoriesUsed: (count: number) => void;
   onToken: (token: string) => void;
+  onTranslationToken: (token: string) => void;
 }
 
 /** Retrieval budget: enough context to be personal, small enough to prefill fast on a CPU. */
 const MAX_MEMORIES = 4;
 const MAX_MEMORY_CHARS = 1100;
 const MAX_POEM_TOKENS = 360;
+const MAX_TRANSLATION_TOKENS = 320;
 const MIN_POEM_LINES = 4;
 
 function takeWithinBudget(texts: readonly string[], budget: number): string[] {
@@ -71,7 +75,8 @@ export async function generateCalaverita(
 
   const tone = toneAt(input.toneLevel);
   const figure = figureName(input.figureId);
-  const prompt = buildCalaveritaPrompt({ profile, memories, ofrendaItems, focus: input.focus }, tone, figure);
+  const language = writtenIn(input.language);
+  const prompt = buildCalaveritaPrompt({ profile, memories, ofrendaItems, focus: input.focus }, tone, figure, language);
 
   callbacks.onPhase('writing');
   const result = await withTextModel(pack, (context) =>
@@ -101,13 +106,47 @@ export async function generateCalaverita(
     );
   }
 
+  // Stopped mid-poem means stop: keep what was written and skip the translation.
+  const translation =
+    input.language === 'both' && !result.interrupted ? await translatePoem(pack, poem, callbacks) : null;
+
   callbacks.onPhase('saving');
   return insertTribute({
     profileId: profile.id,
     tone: tone.level,
     figure,
     poem,
+    language,
+    translation,
     modelLabel: pack.textModelLabel,
     tokensPerSecond: result.timings?.predicted_per_second ?? null,
   });
+}
+
+/**
+ * Second pass for "Spanish + English". The poem is already complete, so a
+ * failed or stopped translation saves the Spanish poem on its own.
+ */
+async function translatePoem(pack: ModelPack, poem: string, callbacks: GenerateCallbacks): Promise<string | null> {
+  callbacks.onPhase('translating');
+  try {
+    const result = await withTextModel(pack, (context) =>
+      trackCompletion(context, () =>
+        context.completion(
+          {
+            messages: [{ role: 'user', content: buildTranslationPrompt(poem) }],
+            enable_thinking: false,
+            n_predict: MAX_TRANSLATION_TOKENS,
+            temperature: 0.3,
+            top_p: 0.9,
+          },
+          (data) => callbacks.onTranslationToken(data.token),
+        ),
+      ),
+    );
+    if (result.interrupted) return null;
+    return cleanTranslation(result.content || result.text) || null;
+  } catch {
+    return null;
+  }
 }

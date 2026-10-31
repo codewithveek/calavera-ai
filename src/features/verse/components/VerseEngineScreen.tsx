@@ -7,10 +7,12 @@ import { Button } from '@/shared/ui/Button';
 import { Screen } from '@/shared/ui/Screen';
 import { TextField } from '@/shared/ui/TextField';
 
+import { DEFAULT_POEM_LANGUAGE, type PoemLanguage } from '../languages';
 import { DEFAULT_TONE_LEVEL, type DeathFigureId } from '../tones';
 import { useCalaveritaGenerator } from '../useCalaveritaGenerator';
 import { verseActions } from '../verseStore';
 import { FigurePicker } from './FigurePicker';
+import { LanguagePicker } from './LanguagePicker';
 import { StreamingPoem } from './StreamingPoem';
 import { ToneSlider } from './ToneSlider';
 
@@ -21,6 +23,7 @@ export function VerseEngineScreen({ initialProfileId }: { initialProfileId: numb
   const [toneLevel, setToneLevel] = useState(DEFAULT_TONE_LEVEL);
   const [figureId, setFigureId] = useState<DeathFigureId>('catrina');
   const [focus, setFocus] = useState('');
+  const [language, setLanguage] = useState<PoemLanguage>(DEFAULT_POEM_LANGUAGE);
   const { generate, stop, isGenerating } = useCalaveritaGenerator();
 
   // A fresh visit should not show the previous session's error.
@@ -33,7 +36,7 @@ export function VerseEngineScreen({ initialProfileId }: { initialProfileId: numb
       label="Write the calaverita"
       icon="💀"
       disabled={profileId === null}
-      onPress={() => profileId !== null && generate({ profileId, toneLevel, figureId, focus })}
+      onPress={() => profileId !== null && generate({ profileId, toneLevel, figureId, focus, language })}
       fullWidth
     />
   );
@@ -45,6 +48,7 @@ export function VerseEngineScreen({ initialProfileId }: { initialProfileId: numb
         written here, offline, from the memories in your archive.
       </AppText>
       <ProfilePicker label="Who is it for?" selectedId={profileId} onSelect={setProfileId} />
+      <LanguagePicker value={language} onChange={setLanguage} />
       <ToneSlider level={toneLevel} onChange={setToneLevel} disabled={isGenerating} />
       <FigurePicker value={figureId} onChange={setFigureId} />
       <TextField
