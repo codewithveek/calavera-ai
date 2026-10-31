@@ -53,10 +53,10 @@ export function toneAt(level: number): Tone {
 
 export type DeathFigureId = 'catrina' | 'parca' | 'muerte';
 
-export const DEATH_FIGURES: readonly { id: DeathFigureId; name: string }[] = [
-  { id: 'catrina', name: 'La Catrina' },
-  { id: 'parca', name: 'La Parca' },
-  { id: 'muerte', name: 'La Muerte' },
+export const DEATH_FIGURES: readonly { id: DeathFigureId; name: string; english: string }[] = [
+  { id: 'catrina', name: 'La Catrina', english: 'the elegant skeleton lady' },
+  { id: 'parca', name: 'La Parca', english: 'the Grim Reaper' },
+  { id: 'muerte', name: 'La Muerte', english: 'Death herself' },
 ];
 
 export function figureName(id: string): string {

@@ -12,6 +12,8 @@ interface FigurePickerProps {
 }
 
 export function FigurePicker({ value, onChange }: FigurePickerProps) {
+  const selected = DEATH_FIGURES.find((figure) => figure.id === value);
+
   return (
     <View style={styles.container}>
       <AppText variant="label">Death arrives as</AppText>
@@ -20,6 +22,11 @@ export function FigurePicker({ value, onChange }: FigurePickerProps) {
           <Chip key={figure.id} label={figure.name} selected={figure.id === value} onPress={() => onChange(figure.id)} />
         ))}
       </View>
+      {selected ? (
+        <AppText variant="caption" tone="muted">
+          {selected.name} · {selected.english}
+        </AppText>
+      ) : null}
     </View>
   );
 }

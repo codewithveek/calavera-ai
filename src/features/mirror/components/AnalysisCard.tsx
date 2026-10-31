@@ -19,7 +19,7 @@ export function AnalysisCard({ analysis }: { analysis: HeirloomAnalysis }) {
         <View style={styles.identity}>
           <AppText variant="heading">{analysis.objectName}</AppText>
           <AppText tone="accent" serif>
-            {analysis.spanishName}
+            {analysis.spanishName} · {analysis.englishName}
           </AppText>
           <AppText variant="caption" tone="muted">
             Recognised on this phone in{' '}

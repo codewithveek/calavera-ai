@@ -25,8 +25,8 @@ export function HubScreen() {
           <AppText variant="title">El Altar Digital</AppText>
           <AppText tone="muted">
             {profiles.length === 0
-              ? 'Begin by adding a loved one to the archive.'
-              : `${pluralize(profiles.length, 'soul')} remembered · ${pluralize(memoryCount, 'memory', 'memories')}`}
+              ? 'The digital altar. Begin by adding a loved one to the archive.'
+              : `The digital altar · ${pluralize(profiles.length, 'soul')} remembered · ${pluralize(memoryCount, 'memory', 'memories')}`}
           </AppText>
         </View>
         <Pressable
