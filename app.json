@@ -81,7 +81,8 @@
       "expo-status-bar",
       "expo-image",
       "expo-sharing",
-      "./plugins/withWindowsNativeBuild"
+      "./plugins/withWindowsNativeBuild",
+      "./plugins/withCpuOnlyLlama"
     ],
     "experiments": {
       "typedRoutes": true,

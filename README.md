@@ -52,7 +52,7 @@ The app reads the device's RAM and recommends a pack. You can switch packs later
 - **Small inputs.** Photos are downscaled to 512 px before vision inference (fewer image tokens, smaller thumbnails on disk). Image tokens are capped at 256.
 - **Grammar-constrained vision.** A JSON schema becomes a GBNF grammar, so even a 500M model always returns parseable output.
 - **Lean rendering.** React Compiler auto-memoisation, Hermes, the New Architecture, `inlineRequires` (modules load on first use), FlashList, `activityEnabled` screens, UI-thread Reanimated candles that respect *reduce motion*, and a progress bar driven by `scaleX` (no layout passes).
-- **Less native code.** Optional expo-router dependencies the app never uses (gesture-handler and masked-view, needed only by the JS stack and drawer) are excluded from autolinking in `package.json`. The APK ships only arm64-v8a and x86_64, the two ABIs llama.cpp supports.
+- **Less native code.** Optional expo-router dependencies the app never uses (gesture-handler and masked-view, needed only by the JS stack and drawer) are excluded from autolinking in `package.json`. llama.rn's Snapdragon Hexagon/OpenCL build and HTP blobs (~16 MB, unused because inference is CPU-only) are left out of the APK by `plugins/withCpuOnlyLlama.js`. The APK ships only arm64-v8a and x86_64, the two ABIs llama.cpp supports.
 - **SQLite tuned.** WAL, `synchronous=NORMAL`, indexed foreign keys, and a vec0 table partitioned by ancestor so per-person KNN scans only their memories.
 
 ## Project structure
@@ -73,7 +73,7 @@ src/
     verse/             prompt, tones, scratchpad parser, meter, generator, streaming UI
     tributes/          card, recitation, export, meter analysis
   shared/              theme tokens, UI primitives, query client and keys, utilities
-plugins/               Expo config plugins (Windows native build fix)
+plugins/               Expo config plugins (Windows native build fix, CPU-only llama.rn packaging)
 ```
 
 State management: **TanStack Query** for everything read from SQLite or disk (with `networkMode: 'always'`, so it works in airplane mode). **zustand** for download progress, model loading and the streaming poem session. Model settings are persisted through expo-sqlite's synchronous key-value store.
