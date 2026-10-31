@@ -1,4 +1,4 @@
-import { getDatabase } from '@/db/database';
+import { withTransaction } from '@/db/database';
 import { embedText, embedTexts } from '@/features/engine/embeddings';
 import type { ModelPack } from '@/features/models/registry';
 import { UserFacingError } from '@/shared/lib/errors';
@@ -33,12 +33,7 @@ export async function addMemory(
   input: { profileId: number; source: MemorySource; body: string },
 ): Promise<number> {
   const prepared = await prepareMemory(pack, input);
-  const db = await getDatabase();
-  let memoryId = 0;
-  await db.withExclusiveTransactionAsync(async (txn) => {
-    memoryId = await insertMemory(txn, prepared);
-  });
-  return memoryId;
+  return withTransaction((db) => insertMemory(db, prepared));
 }
 
 export async function findRelatedMemories(

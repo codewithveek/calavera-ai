@@ -1,10 +1,13 @@
 import * as SQLite from 'expo-sqlite';
 
+import { createMutex } from '@/shared/lib/mutex';
+
 import { migrate } from './migrations';
 
 const DATABASE_NAME = 'calavera.db';
 
 let databasePromise: Promise<SQLite.SQLiteDatabase> | null = null;
+const runTransaction = createMutex();
 
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
@@ -32,6 +35,24 @@ export function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     throw error;
   });
   return databasePromise;
+}
+
+/**
+ * Runs `task` atomically on the app connection, one transaction at a time.
+ * Deliberately not `withExclusiveTransactionAsync`: that opens a new
+ * connection, and both sqlite-vec and `foreign_keys` are per-connection (the
+ * pragma can't even be enabled after BEGIN), so vec0 writes would fail and
+ * ON DELETE CASCADE would silently not run.
+ */
+export function withTransaction<T>(task: (db: SQLite.SQLiteDatabase) => Promise<T>): Promise<T> {
+  return runTransaction(async () => {
+    const db = await getDatabase();
+    let result: T | undefined;
+    await db.withTransactionAsync(async () => {
+      result = await task(db);
+    });
+    return result as T;
+  });
 }
 
 /** Serialises a Float32Array as the little-endian blob sqlite-vec expects. */

@@ -80,9 +80,10 @@ export async function migrate(db: SQLiteDatabase): Promise<void> {
   for (let version = current; version < MIGRATIONS.length; version++) {
     const migration = MIGRATIONS[version];
     if (!migration) break;
-    await db.withExclusiveTransactionAsync(async (txn) => {
-      await migration(txn);
-      await txn.execAsync(`PRAGMA user_version = ${version + 1}`);
+    // Same connection on purpose: vec0 only exists where sqlite-vec was loaded (see withTransaction).
+    await db.withTransactionAsync(async () => {
+      await migration(db);
+      await db.execAsync(`PRAGMA user_version = ${version + 1}`);
     });
   }
 }

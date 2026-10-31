@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { getDatabase, toVectorBlob } from '@/db/database';
+import { getDatabase, toVectorBlob, withTransaction } from '@/db/database';
 
 import type { Memory, MemoryMatch, MemorySource } from './types';
 
@@ -80,14 +80,13 @@ export async function listMemories(profileId: number): Promise<Memory[]> {
   return rows.map(toMemory);
 }
 
-export async function deleteMemory(memoryId: number): Promise<void> {
-  const db = await getDatabase();
-  await db.withExclusiveTransactionAsync(async (txn) => {
-    const chunks = await txn.getAllAsync<{ id: number }>('SELECT id FROM memory_chunks WHERE memory_id = ?', memoryId);
+export function deleteMemory(memoryId: number): Promise<void> {
+  return withTransaction(async (db) => {
+    const chunks = await db.getAllAsync<{ id: number }>('SELECT id FROM memory_chunks WHERE memory_id = ?', memoryId);
     for (const { id } of chunks) {
-      await txn.runAsync('DELETE FROM memory_vectors WHERE chunk_id = ?', id);
+      await db.runAsync('DELETE FROM memory_vectors WHERE chunk_id = ?', id);
     }
-    await txn.runAsync('DELETE FROM memories WHERE id = ?', memoryId);
+    await db.runAsync('DELETE FROM memories WHERE id = ?', memoryId);
   });
 }
 

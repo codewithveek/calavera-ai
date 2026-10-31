@@ -1,4 +1,4 @@
-import { getDatabase } from '@/db/database';
+import { getDatabase, withTransaction } from '@/db/database';
 
 import type { Profile, ProfileDraft, ProfileSummary } from './types';
 
@@ -57,10 +57,9 @@ export async function createProfile(draft: ProfileDraft): Promise<number> {
 }
 
 /** Vectors live in a virtual table without foreign keys, so they are removed explicitly. */
-export async function deleteProfile(id: number): Promise<void> {
-  const db = await getDatabase();
-  await db.withExclusiveTransactionAsync(async (txn) => {
-    await txn.runAsync('DELETE FROM memory_vectors WHERE profile_id = ?', id);
-    await txn.runAsync('DELETE FROM profiles WHERE id = ?', id);
+export function deleteProfile(id: number): Promise<void> {
+  return withTransaction(async (db) => {
+    await db.runAsync('DELETE FROM memory_vectors WHERE profile_id = ?', id);
+    await db.runAsync('DELETE FROM profiles WHERE id = ?', id);
   });
 }

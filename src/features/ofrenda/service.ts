@@ -1,4 +1,4 @@
-import { getDatabase } from '@/db/database';
+import { withTransaction } from '@/db/database';
 import { insertMemory } from '@/features/memories/repo';
 import { prepareMemory } from '@/features/memories/service';
 import { deleteImage, persistOfrendaImage } from '@/features/mirror/imagePrep';
@@ -30,12 +30,10 @@ export async function saveHeirloom(pack: ModelPack, { profileId, analysis, note 
   const prepared = await prepareMemory(pack, { profileId, source: 'heirloom', body });
   const imageUri = persistOfrendaImage(analysis.imageUri);
 
-  const db = await getDatabase();
-  let itemId = 0;
   try {
-    await db.withExclusiveTransactionAsync(async (txn) => {
-      const memoryId = await insertMemory(txn, prepared);
-      itemId = await insertOfrendaItem(txn, {
+    return await withTransaction(async (db) => {
+      const memoryId = await insertMemory(db, prepared);
+      return insertOfrendaItem(db, {
         profileId,
         memoryId,
         name: analysis.objectName,
@@ -49,7 +47,6 @@ export async function saveHeirloom(pack: ModelPack, { profileId, analysis, note 
     deleteImage(imageUri);
     throw error;
   }
-  return itemId;
 }
 
 export async function removeOfrendaItem(item: OfrendaItem): Promise<void> {
