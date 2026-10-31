@@ -8,15 +8,18 @@ import { createRateMeter } from '@/shared/lib/rate';
 
 import { downloadActions } from './downloadStore';
 import { startFileDownload, verifyAndInstall, type FileDownload } from './downloader';
-import { refreshModelQueries } from './packLifecycle';
+import { activatePack, refreshModelQueries } from './packLifecycle';
+import { usesSystemDownloads } from './paths';
 import type { ModelFile, ModelPackId } from './registry';
 import { useModelSettings } from './settingsStore';
 import { readPackStatus } from './status';
+import { cancelSystemDownloads, downloadWithSystem } from './systemDownloader';
 
 /**
  * Module-level download orchestrator. It lives outside React so a 3 GB
  * transfer survives navigation and re-renders; components only observe
- * `useDownloadStore`.
+ * `useDownloadStore`. On Android the system downloader carries on while the
+ * app is minimised or closed; the in-app path is the fallback.
  */
 
 const KEEP_AWAKE_TAG = 'calavera-model-download';
@@ -27,7 +30,7 @@ let running = false;
 let stopRequested = false;
 let active: { download: FileDownload; file: ModelFile } | null = null;
 
-async function downloadOne(file: ModelFile): Promise<boolean> {
+async function downloadOneInApp(file: ModelFile): Promise<boolean> {
   const settings = useModelSettings.getState();
   const resumeState = settings.pausedDownloads[file.id];
   const rate = createRateMeter();
@@ -36,7 +39,7 @@ async function downloadOne(file: ModelFile): Promise<boolean> {
     PROGRESS_INTERVAL_MS,
   );
 
-  downloadActions.setCurrentFile(file.id);
+  downloadActions.setActiveFiles([file.id]);
   const download = startFileDownload(file, { onProgress: progress.push, resumeState });
   active = { download, file };
 
@@ -49,6 +52,26 @@ async function downloadOne(file: ModelFile): Promise<boolean> {
   } finally {
     progress.flushNow();
     active = null;
+  }
+}
+
+/** One file at a time inside the app; the screen is kept awake because the app must stay open. */
+async function downloadInApp(files: readonly ModelFile[]): Promise<boolean> {
+  await activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => undefined);
+  try {
+    for (const file of files) {
+      const completed = await downloadOneInApp(file);
+      if (!completed || stopRequested) return false;
+
+      useModelSettings.getState().clearPausedDownload(file.id);
+      downloadActions.setPhase('verifying');
+      await verifyAndInstall(file);
+      await refreshModelQueries();
+      downloadActions.setPhase('downloading');
+    }
+    return true;
+  } finally {
+    deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => undefined);
   }
 }
 
@@ -70,41 +93,54 @@ export async function downloadPack(packId: ModelPackId): Promise<boolean> {
       );
     }
 
-    await activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => undefined);
     downloadActions.setPhase('downloading');
+    const missing = status.files.filter(({ installed }) => !installed).map(({ file }) => file);
+    const inBackground = usesSystemDownloads();
+    const finished = inBackground
+      ? await downloadWithSystem(packId, missing, () => stopRequested)
+      : await downloadInApp(missing);
 
-    for (const { file, installed } of status.files) {
-      if (installed) continue;
-      const completed = await downloadOne(file);
-      if (!completed || stopRequested) {
-        downloadActions.setPhase('paused');
-        return false;
-      }
-
-      useModelSettings.getState().clearPausedDownload(file.id);
-      downloadActions.setPhase('verifying');
-      await verifyAndInstall(file);
-      await refreshModelQueries();
-      downloadActions.setPhase('downloading');
+    if (!finished) {
+      // A system download stopped means cancelled; an in-app one can resume later.
+      downloadActions.setPhase(inBackground ? 'idle' : 'paused');
+      return false;
     }
-
     downloadActions.setPhase('done');
     return true;
   } catch (error) {
-    downloadActions.setPhase('error', toErrorMessage(error, 'Download failed. Please retry on Wi-Fi.'));
+    downloadActions.setPhase('error', toErrorMessage(error, 'Download failed. Please try again on Wi-Fi.'));
     return false;
   } finally {
     running = false;
-    downloadActions.setCurrentFile(null);
-    deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => undefined);
+    downloadActions.setActiveFiles([]);
     await refreshModelQueries();
   }
 }
 
-export async function pauseDownload(): Promise<void> {
+/** Downloads the pack, then switches the app to it. */
+export async function downloadAndActivate(packId: ModelPackId): Promise<void> {
+  if (await downloadPack(packId)) await activatePack(packId);
+}
+
+/** Picks up downloads Android kept running while the app was closed. */
+export function resumeBackgroundDownload(): void {
+  const tracked = useModelSettings.getState().systemDownloads;
+  if (tracked && !running) void downloadAndActivate(tracked.packId);
+}
+
+/** True when stopping cancels (system downloads cannot pause) rather than pauses. */
+export const stopCancelsDownload = usesSystemDownloads;
+
+/** Pauses an in-app download, or cancels a system one. */
+export async function stopDownload(): Promise<void> {
+  stopRequested = true;
+  if (usesSystemDownloads()) {
+    cancelSystemDownloads();
+    downloadActions.reset();
+    return;
+  }
   const current = active;
   if (!current) return;
-  stopRequested = true;
   const state = await current.download.pause();
   if (state) useModelSettings.getState().savePausedDownload(current.file.id, state);
 }

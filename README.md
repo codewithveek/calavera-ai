@@ -27,7 +27,7 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 
 | Screen | What happens on-device |
 | --- | --- |
-| **1. Offline AI** | Checks RAM and storage, recommends a model pack, then streams the weights. Downloads pause and resume (even after the app is killed), and every file is verified against its Hugging Face SHA-256. |
+| **1. Offline AI** | Checks RAM and storage, recommends a model pack, then hands the files to Android's DownloadManager: they download in parallel and keep going while the app is minimised or closed, with the system download notification. Reopening the app picks the download back up, and every file is verified against its Hugging Face SHA-256 before use. |
 | **2. El Altar Digital** | A three-tier ofrenda (Cielo · Tierra · Inframundo) built from your scans. Empty slots open the Soul Mirror. |
 | **3. Soul Mirror** | A vision-language model names the heirloom. A cultural knowledge base decides its tier and meaning, and the scan becomes a memory. |
 | **4. Memory Archive** | Stories are chunked, embedded and stored in sqlite-vec. *Ask the archive* runs semantic search by meaning. |
@@ -74,6 +74,7 @@ src/
     tributes/          card, recitation, export, meter analysis
   shared/              theme tokens, UI primitives, query client and keys, utilities
 plugins/               Expo config plugins (Windows native build fix, CPU-only llama.rn packaging)
+modules/               Local Expo module: system-downloads (Android DownloadManager bridge)
 ```
 
 State management: **TanStack Query** for everything read from SQLite or disk (with `networkMode: 'always'`, so it works in airplane mode). **zustand** for download progress, model loading and the streaming poem session. Model settings are persisted through expo-sqlite's synchronous key-value store.

@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { formatBytes } from '@/shared/lib/format';
 import { spacing } from '@/shared/theme/tokens';
@@ -88,16 +88,29 @@ function SetupActions({ setup }: { setup: ReturnType<typeof useModelSetup> }) {
   }
 
   if (setup.isBusy) {
+    const stop = setup.stopCancels
+      ? () =>
+          Alert.alert('Cancel the download?', 'What has downloaded so far will be deleted.', [
+            { text: 'Keep downloading', style: 'cancel' },
+            { text: 'Cancel download', style: 'destructive', onPress: () => setup.stopDownload() },
+          ])
+      : () => setup.stopDownload();
+
     return (
       <>
         {summary}
         <Button
-          label={setup.phase === 'verifying' ? 'Checking…' : 'Pause download'}
+          label={setup.phase === 'verifying' ? 'Checking…' : setup.stopCancels ? 'Cancel download' : 'Pause download'}
           variant="secondary"
           disabled={setup.phase === 'verifying'}
-          onPress={() => setup.pauseDownload()}
+          onPress={stop}
           fullWidth
         />
+        {setup.stopCancels ? (
+          <AppText variant="caption" tone="muted" center>
+            You can leave the app: the download carries on in the background.
+          </AppText>
+        ) : null}
       </>
     );
   }
@@ -114,7 +127,9 @@ function SetupActions({ setup }: { setup: ReturnType<typeof useModelSetup> }) {
       {summary}
       <Button label={label} icon="⬇️" onPress={() => setup.startDownload()} fullWidth />
       <AppText variant="caption" tone="muted" center>
-        Wi-Fi recommended. Downloads resume where they left off.
+        {setup.stopCancels
+          ? 'Wi-Fi recommended. It keeps downloading even if you leave the app.'
+          : 'Wi-Fi recommended. Downloads resume where they left off.'}
       </AppText>
     </>
   );

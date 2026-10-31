@@ -5,9 +5,15 @@ import { spacing } from '@/shared/theme/tokens';
 import { AppText } from '@/shared/ui/AppText';
 import { ProgressBar } from '@/shared/ui/ProgressBar';
 
-import { useDownloadStore } from '../downloadStore';
+import { useDownloadStore, type DownloadWait } from '../downloadStore';
 import type { FileStatus } from '../status';
 import { useDownloadProgress } from '../useDownloadProgress';
+
+const WAIT_MESSAGES: Record<DownloadWait, string> = {
+  network: 'Waiting for an internet connection…',
+  wifi: 'Waiting for Wi-Fi…',
+  retry: 'The connection dropped. Trying again…',
+};
 
 interface DownloadSummaryProps {
   files: FileStatus[];
@@ -19,7 +25,8 @@ export function DownloadSummary({ files, totalBytes }: DownloadSummaryProps) {
   const { doneBytes, remainingBytes, fraction } = useDownloadProgress(files, totalBytes);
   const bytesPerSecond = useDownloadStore((state) => state.bytesPerSecond);
   const phase = useDownloadStore((state) => state.phase);
-  const showRate = phase === 'downloading' && bytesPerSecond > 0;
+  const waitingFor = useDownloadStore((state) => state.waitingFor);
+  const showRate = phase === 'downloading' && !waitingFor && bytesPerSecond > 0;
 
   return (
     <View style={styles.root}>
@@ -33,6 +40,11 @@ export function DownloadSummary({ files, totalBytes }: DownloadSummaryProps) {
       {showRate ? (
         <AppText variant="caption" tone="muted">
           About {formatDuration(remainingBytes / bytesPerSecond)} left
+        </AppText>
+      ) : null}
+      {phase === 'downloading' && waitingFor ? (
+        <AppText variant="caption" tone="accent">
+          {WAIT_MESSAGES[waitingFor]}
         </AppText>
       ) : null}
       {phase === 'verifying' ? (

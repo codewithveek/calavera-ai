@@ -4,7 +4,10 @@ import { MODEL_PACKS, packFiles, type ModelFile, type ModelPackId } from './regi
 export interface FileStatus {
   file: ModelFile;
   installed: boolean;
-  /** Bytes already on disk from an interrupted download. */
+  /**
+   * Size of the `.part` file: progress for in-app downloads, but space already
+   * reserved for system downloads (Android allocates the whole file up front).
+   */
   partialBytes: number;
 }
 

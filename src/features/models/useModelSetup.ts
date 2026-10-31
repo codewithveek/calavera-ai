@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { downloadPack, pauseDownload } from './downloadController';
+import { downloadAndActivate, resumeBackgroundDownload, stopCancelsDownload, stopDownload } from './downloadController';
 import { useDownloadStore } from './downloadStore';
 import { useDeviceProfile, usePackStatus, useUnusedModelFiles } from './hooks';
 import { activatePack, removeUnusedModels } from './packLifecycle';
@@ -19,8 +19,15 @@ export function useModelSetup() {
   const activePackId = useModelSettings((state) => state.selectedPackId);
   const { data: device } = useDeviceProfile();
   const [viewedPackId, setViewedPackId] = useState<ModelPackId | null>(null);
+  // A pack Android is downloading in the background (possibly since before a relaunch).
+  const backgroundPackId = useModelSettings((state) => state.systemDownloads?.packId ?? null);
 
-  const packId = viewedPackId ?? activePackId ?? device?.recommendedPackId ?? 'lite';
+  // Pick the background download back up so progress, checking and activation continue here.
+  useEffect(() => {
+    resumeBackgroundDownload();
+  }, []);
+
+  const packId = viewedPackId ?? backgroundPackId ?? activePackId ?? device?.recommendedPackId ?? 'lite';
   const pack = MODEL_PACKS[packId];
   const { data: status } = usePackStatus(packId);
   const { data: unusedFiles = [] } = useUnusedModelFiles(activePackId);
@@ -44,11 +51,6 @@ export function useModelSetup() {
     mutationFn: () => removeUnusedModels(activePackId ?? packId),
   });
 
-  const startDownload = async () => {
-    const installed = await downloadPack(packId);
-    if (installed) await activatePack(packId);
-  };
-
   return {
     device,
     pack,
@@ -66,8 +68,10 @@ export function useModelSetup() {
     viewPack: (id: ModelPackId) => {
       if (!isBusy) setViewedPackId(id);
     },
-    startDownload,
-    pauseDownload,
+    startDownload: () => downloadAndActivate(packId),
+    stopDownload,
+    /** Background downloads cannot pause: stopping cancels them (and needs a confirmation). */
+    stopCancels: stopCancelsDownload(),
     enterAltar,
     activate: activation.mutate,
     isActivating: activation.isPending,

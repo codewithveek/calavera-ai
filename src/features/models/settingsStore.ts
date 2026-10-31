@@ -5,12 +5,20 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { ModelFileId, ModelPackId } from './registry';
 
+/** Downloads handed to Android's DownloadManager, so a relaunch reattaches instead of starting over. */
+export interface TrackedSystemDownloads {
+  packId: ModelPackId;
+  ids: Partial<Record<ModelFileId, number>>;
+}
+
 interface ModelSettingsState {
   /** `null` until the user picks a pack on first launch. */
   selectedPackId: ModelPackId | null;
   /** Resume tokens for downloads paused in a previous session. */
   pausedDownloads: Partial<Record<ModelFileId, DownloadPauseState>>;
+  systemDownloads: TrackedSystemDownloads | null;
   selectPack: (packId: ModelPackId) => void;
+  trackSystemDownloads: (downloads: TrackedSystemDownloads | null) => void;
   savePausedDownload: (fileId: ModelFileId, state: DownloadPauseState) => void;
   clearPausedDownload: (fileId: ModelFileId) => void;
 }
@@ -32,7 +40,9 @@ export const useModelSettings = create<ModelSettingsState>()(
     (set) => ({
       selectedPackId: null,
       pausedDownloads: {},
+      systemDownloads: null,
       selectPack: (packId) => set({ selectedPackId: packId }),
+      trackSystemDownloads: (downloads) => set({ systemDownloads: downloads }),
       savePausedDownload: (fileId, state) =>
         set((current) => ({ pausedDownloads: { ...current.pausedDownloads, [fileId]: state } })),
       clearPausedDownload: (fileId) =>
@@ -44,7 +54,11 @@ export const useModelSettings = create<ModelSettingsState>()(
     {
       name: 'calavera-model-settings',
       storage: syncStorage,
-      partialize: ({ selectedPackId, pausedDownloads }) => ({ selectedPackId, pausedDownloads }),
+      partialize: ({ selectedPackId, pausedDownloads, systemDownloads }) => ({
+        selectedPackId,
+        pausedDownloads,
+        systemDownloads,
+      }),
     },
   ),
 );

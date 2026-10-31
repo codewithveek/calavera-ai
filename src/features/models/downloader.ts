@@ -2,7 +2,7 @@ import { DownloadTask, File, type DownloadPauseState } from 'expo-file-system';
 
 import { UserFacingError } from '@/shared/lib/errors';
 
-import { ensureModelsDirectory, modelFileHandle, partialFileHandle } from './paths';
+import { allModelFileHandles, downloadDirectory, partialFileHandle, promotePartial } from './paths';
 import { modelUrl, type ModelFile } from './registry';
 
 export interface FileDownload {
@@ -35,9 +35,12 @@ const ALREADY_DOWNLOADED: FileDownload = {
   cancel: () => undefined,
 };
 
-/** Streams a model into `<name>.part`; the final name only appears after verification. */
+/**
+ * In-app download (used when the system downloader is unavailable): streams a
+ * model into `<name>.part`; the final name only appears after verification.
+ */
 export function startFileDownload(file: ModelFile, { onProgress, resumeState }: StartOptions): FileDownload {
-  ensureModelsDirectory();
+  downloadDirectory(); // creates the folder on first use
   const options = { onProgress: ({ bytesWritten }: { bytesWritten: number }) => onProgress(bytesWritten) };
 
   const partial = partialFileHandle(file);
@@ -87,16 +90,12 @@ export async function verifyAndInstall(file: ModelFile): Promise<void> {
     throw new UserFacingError(`${file.label} was damaged while downloading, so it was removed. Please try again.`);
   }
 
-  const target = modelFileHandle(file);
-  if (target.exists) target.delete();
-  partial.move(target);
+  promotePartial(file);
 }
 
-/** Removes installed weights and partial downloads for the given files. */
+/** Removes installed weights and partial downloads for the given files, wherever they are. */
 export function deleteModelFiles(files: readonly ModelFile[]): void {
-  for (const file of files) {
-    for (const handle of [modelFileHandle(file), partialFileHandle(file)]) {
-      if (handle.exists) handle.delete();
-    }
+  for (const handle of files.flatMap(allModelFileHandles)) {
+    if (handle.exists) handle.delete();
   }
 }
