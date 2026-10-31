@@ -13,7 +13,10 @@ export type ModelFileId =
 
 export interface ModelFile {
   id: ModelFileId;
+  /** Plain-language name shown to people ("The poet"), not the model's technical name. */
   label: string;
+  /** What it does for the user, in one short phrase. */
+  purpose: string;
   repo: string;
   fileName: string;
   sizeBytes: number;
@@ -28,9 +31,8 @@ export interface ModelPack {
   tagline: string;
   /** Device RAM (GiB, as reported by the OS) this pack is tuned for. */
   minRamGiB: number;
-  /** Human-readable model names, shown in the UI and saved with each tribute. */
+  /** Technical name of the writer model, saved with each tribute for the record (not shown). */
   textModelLabel: string;
-  visionModelLabel: string;
   text: ModelFileId;
   vision: { model: ModelFileId; projector: ModelFileId };
   embedding: ModelFileId;
@@ -42,7 +44,8 @@ export const EMBEDDING_DIMENSIONS = 384;
 export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   'gemma2-2b-it-q4km': {
     id: 'gemma2-2b-it-q4km',
-    label: 'Gemma 2 2B Instruct (Q4_K_M)',
+    label: 'The poet',
+    purpose: 'Writes the calaveritas',
     repo: 'bartowski/gemma-2-2b-it-GGUF',
     fileName: 'gemma-2-2b-it-Q4_K_M.gguf',
     sizeBytes: 1_708_582_752,
@@ -50,7 +53,8 @@ export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   },
   'smolvlm-500m-q8': {
     id: 'smolvlm-500m-q8',
-    label: 'SmolVLM 500M Instruct (Q8_0)',
+    label: 'The eyes',
+    purpose: 'Recognises heirlooms in your photos',
     repo: 'ggml-org/SmolVLM-500M-Instruct-GGUF',
     fileName: 'SmolVLM-500M-Instruct-Q8_0.gguf',
     sizeBytes: 436_806_912,
@@ -58,7 +62,8 @@ export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   },
   'smolvlm-500m-mmproj-q8': {
     id: 'smolvlm-500m-mmproj-q8',
-    label: 'SmolVLM vision projector (Q8_0)',
+    label: 'Lens for the eyes',
+    purpose: 'Helps the eyes read photos',
     repo: 'ggml-org/SmolVLM-500M-Instruct-GGUF',
     fileName: 'mmproj-SmolVLM-500M-Instruct-Q8_0.gguf',
     sizeBytes: 108_783_360,
@@ -66,7 +71,8 @@ export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   },
   'gemma4-e2b-it-q4': {
     id: 'gemma4-e2b-it-q4',
-    label: 'Gemma 4 E2B Instruct (Q4_0)',
+    label: 'The poet and the eyes',
+    purpose: 'Writes the calaveritas and recognises heirlooms',
     repo: 'ggml-org/gemma-4-E2B-it-GGUF',
     fileName: 'gemma-4-E2B-it-Q4_0.gguf',
     sizeBytes: 2_841_481_184,
@@ -74,7 +80,8 @@ export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   },
   'gemma4-e2b-mmproj-q8': {
     id: 'gemma4-e2b-mmproj-q8',
-    label: 'Gemma 4 vision projector (Q8_0)',
+    label: 'Lens for the eyes',
+    purpose: 'Helps the eyes read photos',
     repo: 'ggml-org/gemma-4-E2B-it-GGUF',
     fileName: 'mmproj-gemma-4-E2B-it-Q8_0.gguf',
     sizeBytes: 557_368_064,
@@ -82,7 +89,8 @@ export const MODEL_FILES: Record<ModelFileId, ModelFile> = {
   },
   'minilm-l6-v2-q8': {
     id: 'minilm-l6-v2-q8',
-    label: 'all-MiniLM-L6-v2 embeddings (Q8_0)',
+    label: 'The memory keeper',
+    purpose: 'Finds the right family stories',
     repo: 'second-state/All-MiniLM-L6-v2-Embedding-GGUF',
     fileName: 'all-MiniLM-L6-v2-Q8_0.gguf',
     sizeBytes: 25_008_064,
@@ -94,21 +102,19 @@ export const MODEL_PACKS: Record<ModelPackId, ModelPack> = {
   lite: {
     id: 'lite',
     name: 'Ofrenda Lite',
-    tagline: 'Gemma 2 2B writes, SmolVLM sees. Tuned for 4–5 GB phones.',
+    tagline: 'Lighter and quicker. Made for phones with 4–5 GB of memory.',
     minRamGiB: 3.5,
     textModelLabel: 'Gemma 2 2B',
-    visionModelLabel: 'SmolVLM 500M',
     text: 'gemma2-2b-it-q4km',
     vision: { model: 'smolvlm-500m-q8', projector: 'smolvlm-500m-mmproj-q8' },
     embedding: 'minilm-l6-v2-q8',
   },
   standard: {
     id: 'standard',
-    name: 'Ofrenda Gemma 4',
-    tagline: 'One multimodal Gemma 4 E2B writes and sees. For 6 GB+ phones.',
+    name: 'Ofrenda Plus',
+    tagline: 'Richer verses and sharper eyes. For phones with 6 GB of memory or more.',
     minRamGiB: 5.4,
     textModelLabel: 'Gemma 4 E2B',
-    visionModelLabel: 'Gemma 4 E2B',
     text: 'gemma4-e2b-it-q4',
     vision: { model: 'gemma4-e2b-it-q4', projector: 'gemma4-e2b-mmproj-q8' },
     embedding: 'minilm-l6-v2-q8',

@@ -109,7 +109,7 @@ function PlacementForm({ analysis, onRetake }: { analysis: HeirloomAnalysis; onR
         onChangeText={setNote}
         multiline
         placeholder="They wore this hat to every family wedding…"
-        hint="Saved to the memory archive so the Verse Engine can use it."
+        hint="Saved with their memories to inspire their calaverita."
       />
       {save.isError ? <AppText tone="danger">{toErrorMessage(save.error)}</AppText> : null}
     </Screen>

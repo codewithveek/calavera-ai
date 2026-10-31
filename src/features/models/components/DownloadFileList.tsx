@@ -21,7 +21,7 @@ export function DownloadFileList({ files, totalBytes }: DownloadFileListProps) {
   return (
     <Card>
       <AppText variant="label" tone="muted">
-        IN THIS PACK
+        WHAT&apos;S INSIDE
       </AppText>
       <View style={styles.files}>
         {rows.map((row) => (
@@ -31,7 +31,8 @@ export function DownloadFileList({ files, totalBytes }: DownloadFileListProps) {
               {row.file.label}
             </AppText>
             <AppText variant="caption" tone="muted">
-              {row.installed ? 'Verified' : `${formatBytes(row.bytes)} / ${formatBytes(row.file.sizeBytes)}`}
+              {row.file.purpose} ·{' '}
+              {row.installed ? 'Ready' : `${formatBytes(row.bytes)} of ${formatBytes(row.file.sizeBytes)}`}
             </AppText>
             {row.active ? (
               <ProgressBar progress={row.bytes / row.file.sizeBytes} color={colors.rosa} />

@@ -17,7 +17,7 @@ import { PackOption } from './PackOption';
 /** Screen 1: validates local weights and streams any that are missing. */
 export function ModelSetupScreen() {
   const setup = useModelSetup();
-  if (!setup.device || !setup.status) return <LoadingState label="Checking local weights…" />;
+  if (!setup.device || !setup.status) return <LoadingState label="Checking your downloads…" />;
 
   return (
     <Screen edges={setup.isActive ? ['bottom'] : ['top', 'bottom']} footer={<SetupActions setup={setup} />}>
@@ -28,8 +28,8 @@ export function ModelSetupScreen() {
             Calavera AI
           </AppText>
           <AppText tone="muted" center>
-            An ofrenda that lives entirely on your phone. Download the open-weight models once, then everything
-            works with the internet off: your family&apos;s stories never leave this device.
+            An ofrenda that lives entirely on your phone. Download its AI once, then everything works with the
+            internet off: your family&apos;s stories never leave this phone.
           </AppText>
         </View>
       ) : null}
@@ -58,7 +58,7 @@ export function ModelSetupScreen() {
         <Button
           variant="secondary"
           icon="🧹"
-          label={`Remove unused models (${formatBytes(setup.unusedFiles.reduce((sum, file) => sum + file.sizeBytes, 0))})`}
+          label={`Free up ${formatBytes(setup.unusedFiles.reduce((sum, file) => sum + file.sizeBytes, 0))} (other pack)`}
           loading={setup.isRemovingUnused}
           onPress={() => setup.removeUnused()}
         />
@@ -92,7 +92,7 @@ function SetupActions({ setup }: { setup: ReturnType<typeof useModelSetup> }) {
       <>
         {summary}
         <Button
-          label={setup.phase === 'verifying' ? 'Verifying…' : 'Pause download'}
+          label={setup.phase === 'verifying' ? 'Checking…' : 'Pause download'}
           variant="secondary"
           disabled={setup.phase === 'verifying'}
           onPress={() => setup.pauseDownload()}

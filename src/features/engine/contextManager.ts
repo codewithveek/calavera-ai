@@ -26,6 +26,9 @@ interface HeavySlot {
   projectorPath: string | null;
 }
 
+/** What people see while a model wakes up: "Waking the poet…". */
+const ROLE = { writer: 'the poet', eyes: 'the eyes', memory: 'the memory keeper' } as const;
+
 const runExclusive = createMutex();
 
 let heavySlots: HeavySlot[] = [];
@@ -42,7 +45,7 @@ async function initWithProgress(file: ModelFile, label: string, params: typeof G
     return await initLlama({ model: modelPath(file), ...params }, progress.push);
   } catch (error) {
     engineActions.failed();
-    throw new UserFacingError(`Could not load ${label}. Free some memory and try again.`, { cause: error });
+    throw new UserFacingError(`Could not wake ${label}. Close other apps and try again.`, { cause: error });
   }
 }
 
@@ -70,7 +73,7 @@ async function acquireHeavy(file: ModelFile, label: string): Promise<HeavySlot> 
 /** Runs `task` with the pack's writer model loaded. */
 export function withTextModel<T>(pack: ModelPack, task: (context: LlamaContext) => Promise<T>): Promise<T> {
   return runExclusive(async () => {
-    const slot = await acquireHeavy(MODEL_FILES[pack.text], pack.textModelLabel);
+    const slot = await acquireHeavy(MODEL_FILES[pack.text], ROLE.writer);
     // The vision projector is ~0.5 GB; drop it when writing on smaller phones.
     if (slot.projectorPath && maxHeavySlots() === 1) {
       await slot.context.releaseMultimodal();
@@ -83,17 +86,17 @@ export function withTextModel<T>(pack: ModelPack, task: (context: LlamaContext) 
 /** Runs `task` with the pack's vision model and its projector loaded. */
 export function withVisionModel<T>(pack: ModelPack, task: (context: LlamaContext) => Promise<T>): Promise<T> {
   return runExclusive(async () => {
-    const slot = await acquireHeavy(MODEL_FILES[pack.vision.model], pack.visionModelLabel);
+    const slot = await acquireHeavy(MODEL_FILES[pack.vision.model], ROLE.eyes);
     const projectorPath = modelPath(MODEL_FILES[pack.vision.projector]);
     if (slot.projectorPath !== projectorPath) {
-      engineActions.loading(`${pack.visionModelLabel} vision`, 0.5);
+      engineActions.loading(ROLE.eyes, 0.5);
       const enabled = await slot.context.initMultimodal({
         path: projectorPath,
         use_gpu: false,
         image_max_tokens: IMAGE_MAX_TOKENS,
       });
       engineActions.loaded(residentLabels());
-      if (!enabled) throw new UserFacingError('The vision model could not start on this device.');
+      if (!enabled) throw new UserFacingError('The Soul Mirror could not start on this phone. Close other apps and try again.');
       slot.projectorPath = projectorPath;
     }
     return task(slot.context);
@@ -108,7 +111,7 @@ export function withEmbedder<T>(pack: ModelPack, task: (context: LlamaContext) =
     if (embedder?.path !== path) {
       await embedder?.context.release();
       embedder = null;
-      const context = await initWithProgress(file, 'MiniLM embeddings', EMBEDDING_CONTEXT);
+      const context = await initWithProgress(file, ROLE.memory, EMBEDDING_CONTEXT);
       embedder = { path, context };
       engineActions.loaded(residentLabels());
     }

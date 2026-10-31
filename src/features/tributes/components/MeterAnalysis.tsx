@@ -22,8 +22,8 @@ export function MeterAnalysis({ poem }: { poem: string }) {
     <Card>
       <AppText variant="heading">Métrica</AppText>
       <AppText tone="muted">
-        {onMeter} of {lines.length} lines are octosílabos (within one syllable of {OCTOSYLLABLE}, counting sinalefa
-        and stressed endings).
+        {onMeter} of {lines.length} lines have the classic {OCTOSYLLABLE}-syllable beat of a calaverita, give or take
+        one.
       </AppText>
       <View style={styles.lines}>
         {lines.map(({ line, syllables, verdict }, index) => (

@@ -10,7 +10,7 @@ import { ErrorState } from './States';
 export function RouteErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
     <View style={styles.root}>
-      <ErrorState message={toErrorMessage(error, 'This screen hit a problem.')} onRetry={retry} />
+      <ErrorState message={toErrorMessage(error, 'Something went wrong on this screen. Please try again.')} onRetry={retry} />
     </View>
   );
 }

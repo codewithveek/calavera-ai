@@ -27,7 +27,7 @@ export function ArchiveSearch({ onOpenProfile }: ArchiveSearchProps) {
         onChangeText={setQuery}
         placeholder="Who loved to dance?"
         returnKeyType="search"
-        hint="Searches by meaning, not keywords, entirely on this phone."
+        hint="Finds stories by what they mean, not just the exact words. Works offline."
       />
       {search.isFetching ? <ActivityIndicator color={colors.marigold} /> : null}
       {search.isError ? <AppText tone="danger">{toErrorMessage(search.error)}</AppText> : null}

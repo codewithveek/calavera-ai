@@ -50,8 +50,7 @@ function TributeView({ tribute }: { tribute: Tribute }) {
       <TributeCard tribute={tribute} cardRef={cardRef} />
 
       <AppText variant="caption" tone="muted" center>
-        Written by {tribute.modelLabel} on this phone
-        {tribute.tokensPerSecond ? ` · ${tribute.tokensPerSecond.toFixed(1)} tokens/s` : ''} · Death as {tribute.figure}
+        Written on this phone, offline · Death as {tribute.figure}
       </AppText>
 
       <View style={styles.actions}>

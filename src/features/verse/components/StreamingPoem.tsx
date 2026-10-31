@@ -33,10 +33,10 @@ export function StreamingPoem() {
       : phase === 'saving'
         ? 'Inscribing the tribute…'
         : planning
-          ? 'Choosing rhymes in a hidden scratchpad…'
+          ? 'Finding rhymes…'
           : poem
             ? 'Writing on this phone…'
-            : `Reading ${memoriesUsed} ${memoriesUsed === 1 ? 'memory' : 'memories'} into the prompt…`;
+            : `Reading ${memoriesUsed} ${memoriesUsed === 1 ? 'memory' : 'memories'}…`;
 
   return (
     <View style={styles.panel}>

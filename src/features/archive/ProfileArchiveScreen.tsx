@@ -65,7 +65,7 @@ export function ProfileArchiveScreen({ profileId }: { profileId: number }) {
             <TributeList profileId={person.id} />
             <MemoryComposer profileId={person.id} name={person.name} />
             <AppText variant="label" tone="muted">
-              MEMORIES · long-press to forget
+              MEMORIES · press and hold one to forget it
             </AppText>
           </View>
         }

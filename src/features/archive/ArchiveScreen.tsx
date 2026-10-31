@@ -60,7 +60,7 @@ export function ArchiveScreen() {
           <EmptyState
             glyph="🌼"
             title="The archive is waiting"
-            body="Add someone you miss. Their stories are stored as vectors on this phone, ready for the Verse Engine."
+            body="Add someone you miss. Their stories stay on this phone, ready to inspire their calaverita."
           />
         }
       />

@@ -78,13 +78,13 @@ export async function verifyAndInstall(file: ModelFile): Promise<void> {
   const partial = partialFileHandle(file);
   if (!partial.exists || partial.size !== file.sizeBytes) {
     if (partial.exists) partial.delete();
-    throw new UserFacingError(`${file.label} arrived incomplete. Please retry on a stable connection.`);
+    throw new UserFacingError(`${file.label} did not finish downloading. Please try again on a steady connection.`);
   }
 
   const digest = await partial.digest('SHA-256');
   if (digest !== file.sha256) {
     partial.delete();
-    throw new UserFacingError(`${file.label} failed its integrity check and was removed. Please retry.`);
+    throw new UserFacingError(`${file.label} was damaged while downloading, so it was removed. Please try again.`);
   }
 
   const target = modelFileHandle(file);

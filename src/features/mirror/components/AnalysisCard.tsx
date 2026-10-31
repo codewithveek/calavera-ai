@@ -22,7 +22,7 @@ export function AnalysisCard({ analysis }: { analysis: HeirloomAnalysis }) {
             {analysis.spanishName}
           </AppText>
           <AppText variant="caption" tone="muted">
-            Seen on-device in{' '}
+            Recognised on this phone in{' '}
             {analysis.seconds < 60 ? `${analysis.seconds.toFixed(1)}s` : formatDuration(analysis.seconds)}
           </AppText>
         </View>

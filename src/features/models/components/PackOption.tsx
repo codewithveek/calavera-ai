@@ -38,7 +38,7 @@ export function PackOption({ pack, selected, recommended, active, disabled, onSe
       </View>
       <AppText tone="muted">{pack.tagline}</AppText>
       <AppText variant="label">
-        {formatBytes(packSizeBytes(pack))} · writer {pack.textModelLabel} · eyes {pack.visionModelLabel}
+        {formatBytes(packSizeBytes(pack))} download
       </AppText>
     </Pressable>
   );

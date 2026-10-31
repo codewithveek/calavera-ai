@@ -38,10 +38,10 @@ function RootNavigator() {
         <Stack.Screen name="mirror" options={{ title: 'Soul Mirror' }} />
         <Stack.Screen name="archive/index" options={{ title: 'Memory Archive' }} />
         <Stack.Screen name="archive/[profileId]" options={{ title: '' }} />
-        <Stack.Screen name="verse" options={{ title: 'Verse Engine' }} />
+        <Stack.Screen name="verse" options={{ title: 'Calaveritas' }} />
         <Stack.Screen name="tribute/[tributeId]" options={{ title: 'Tribute' }} />
       </Stack.Protected>
-      <Stack.Screen name="models" options={{ title: 'Offline Engine', headerShown: ready }} />
+      <Stack.Screen name="models" options={{ title: 'Offline AI', headerShown: ready }} />
     </Stack>
   );
 }

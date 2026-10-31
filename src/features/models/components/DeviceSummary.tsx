@@ -11,12 +11,11 @@ export function DeviceSummary({ device }: { device: DeviceProfile }) {
       <AppText variant="label" tone="muted">
         YOUR PHONE
       </AppText>
-      <AppText variant="heading">{device.modelName}</AppText>
       <AppText tone="muted">
-        {device.totalMemoryGiB.toFixed(1)} GB RAM · {formatBytes(device.freeDiskBytes)} free
+        {device.totalMemoryGiB.toFixed(1)} GB of memory · {formatBytes(device.freeDiskBytes)} of free space
       </AppText>
       <AppText>
-        Recommended: <AppText tone="accent">{MODEL_PACKS[device.recommendedPackId].name}</AppText>
+        Best for it: <AppText tone="accent">{MODEL_PACKS[device.recommendedPackId].name}</AppText>
       </AppText>
     </Card>
   );

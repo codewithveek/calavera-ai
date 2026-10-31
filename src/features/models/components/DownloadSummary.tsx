@@ -32,12 +32,12 @@ export function DownloadSummary({ files, totalBytes }: DownloadSummaryProps) {
       <ProgressBar progress={fraction} accessibilityLabel="Total download progress" />
       {showRate ? (
         <AppText variant="caption" tone="muted">
-          {formatBytes(bytesPerSecond)}/s · about {formatDuration(remainingBytes / bytesPerSecond)} left
+          About {formatDuration(remainingBytes / bytesPerSecond)} left
         </AppText>
       ) : null}
       {phase === 'verifying' ? (
         <AppText variant="caption" tone="accent">
-          Verifying SHA-256 checksum…
+          Making sure the download is complete…
         </AppText>
       ) : null}
     </View>

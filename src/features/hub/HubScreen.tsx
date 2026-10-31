@@ -1,7 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { useActivePack } from '@/features/models/hooks';
 import { Altar } from '@/features/ofrenda/components/Altar';
 import { PapelPicado } from '@/features/ofrenda/components/PapelPicado';
 import { useProfiles } from '@/features/profiles/hooks';
@@ -15,7 +14,6 @@ import { ModuleDock } from './ModuleDock';
 /** Screen 2: El Altar Digital. */
 export function HubScreen() {
   const router = useRouter();
-  const pack = useActivePack();
   const { data: profiles = [] } = useProfiles();
   const memoryCount = profiles.reduce((total, profile) => total + profile.memoryCount, 0);
 
@@ -33,7 +31,7 @@ export function HubScreen() {
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Offline engine settings"
+          accessibilityLabel="Offline AI settings"
           onPress={() => router.push('/models')}
           style={styles.engineButton}
         >
@@ -46,7 +44,7 @@ export function HubScreen() {
 
       <View style={styles.offlineBadge}>
         <AppText variant="caption" tone="muted" center>
-          🔒 100% on-device · {pack.textModelLabel} · no account, no cloud
+          🔒 Works offline · stays on this phone · no account
         </AppText>
       </View>
     </Screen>

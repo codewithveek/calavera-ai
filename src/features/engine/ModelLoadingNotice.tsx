@@ -18,9 +18,9 @@ export function ModelLoadingNotice() {
       <AppText variant="label">
         Waking {loading.label}…{loading.progress > 0 ? ` ${formatPercent(loading.progress)}` : ''}
       </AppText>
-      <ProgressBar progress={loading.progress} color={colors.turquoise} accessibilityLabel="Model loading" />
+      <ProgressBar progress={loading.progress} color={colors.turquoise} accessibilityLabel="Getting ready" />
       <AppText variant="caption" tone="muted">
-        Loading weights from your phone&apos;s storage. Nothing is sent anywhere.
+        Getting ready on your phone. Nothing is sent anywhere.
       </AppText>
     </View>
   );

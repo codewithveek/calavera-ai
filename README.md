@@ -19,7 +19,7 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
  📜 Memory Archive ── sqlite-vec (Storage layer)
    all-MiniLM-L6-v2        │  text → sentence chunks → 384-d vectors → partitioned KNN index
                            ▼
- 💀 Verse Engine ──── Gemma 2 2B / Gemma 4 E2B (Output layer)
+ 💀 Calaveritas ───── Gemma 2 2B / Gemma 4 E2B (Output layer)
    RAG prompt              │  top-k memories + ofrenda items → streamed calaverita
                            ▼
  🕯️ Tribute ───────── parchment card · offline TTS · local PNG export · métrica check
@@ -27,11 +27,11 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 
 | Screen | What happens on-device |
 | --- | --- |
-| **1. Offline Engine** | Checks RAM and storage, recommends a model pack, then streams the weights. Downloads pause and resume, and every file is verified against its Hugging Face SHA-256. |
+| **1. Offline AI** | Checks RAM and storage, recommends a model pack, then streams the weights. Downloads pause and resume (even after the app is killed), and every file is verified against its Hugging Face SHA-256. |
 | **2. El Altar Digital** | A three-tier ofrenda (Cielo · Tierra · Inframundo) built from your scans. Empty slots open the Soul Mirror. |
 | **3. Soul Mirror** | A vision-language model names the heirloom. A cultural knowledge base decides its tier and meaning, and the scan becomes a memory. |
 | **4. Memory Archive** | Stories are chunked, embedded and stored in sqlite-vec. *Ask the archive* runs semantic search by meaning. |
-| **5. Verse Engine** | Pick a loved one, a tone (tender ↔ satirical) and a death figure. Retrieved memories ground a streamed poem. |
+| **5. Calaveritas** | Pick a loved one, a tone (tender ↔ satirical) and a death figure. Retrieved memories ground a streamed poem. |
 | **6. Tribute** | Parchment card, Spanish recitation (system TTS), share or save as PNG, and a per-line octosyllable meter analysis. |
 
 ## Models (all open weights, GGUF via llama.cpp)
@@ -39,7 +39,7 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 | Pack | Writer | Eyes | Embeddings | Download | Target |
 | --- | --- | --- | --- | --- | --- |
 | **Ofrenda Lite** | Gemma 2 2B Instruct Q4_K_M | SmolVLM 500M Q8_0 + projector | all-MiniLM-L6-v2 Q8_0 | ~2.3 GB | 4–5 GB RAM phones |
-| **Ofrenda Gemma 4** | Gemma 4 E2B Instruct Q4_0 | Gemma 4 E2B + vision projector | all-MiniLM-L6-v2 Q8_0 | ~3.4 GB | 6 GB+ RAM phones |
+| **Ofrenda Plus** | Gemma 4 E2B Instruct Q4_0 | Gemma 4 E2B + vision projector | all-MiniLM-L6-v2 Q8_0 | ~3.4 GB | 6 GB+ RAM phones |
 
 The app reads the device's RAM and recommends a pack. You can switch packs later and remove the one you no longer use.
 

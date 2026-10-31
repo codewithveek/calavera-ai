@@ -38,7 +38,7 @@ export function MemoryComposer({ profileId, name }: { profileId: number; name: s
       <ModelLoadingNotice />
       {addMemory.isError ? <AppText tone="danger">{toErrorMessage(addMemory.error)}</AppText> : null}
       <Button
-        label={addMemory.isPending ? 'Embedding on-device…' : 'Save to the archive'}
+        label={addMemory.isPending ? 'Saving on this phone…' : 'Save to the archive'}
         icon="📜"
         disabled={body.trim().length < 3}
         loading={addMemory.isPending}

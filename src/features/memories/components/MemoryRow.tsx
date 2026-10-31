@@ -13,7 +13,7 @@ interface MemoryRowProps {
 
 export function MemoryRow({ memory, onDelete }: MemoryRowProps) {
   const confirmDelete = () =>
-    Alert.alert('Forget this memory?', 'It will be removed from the archive and its vectors deleted.', [
+    Alert.alert('Forget this memory?', 'It will be removed from this phone.', [
       { text: 'Keep', style: 'cancel' },
       { text: 'Forget', style: 'destructive', onPress: () => onDelete(memory.id) },
     ]);
@@ -21,7 +21,7 @@ export function MemoryRow({ memory, onDelete }: MemoryRowProps) {
   return (
     <Pressable
       onLongPress={confirmDelete}
-      accessibilityHint="Long press to forget this memory"
+      accessibilityHint="Press and hold to forget this memory"
       style={styles.row}
     >
       <View style={styles.meta}>
