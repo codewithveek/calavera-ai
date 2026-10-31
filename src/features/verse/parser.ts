@@ -41,9 +41,19 @@ export function parseVerseOutput(raw: string): ParsedOutput {
     return { planning: false, notes, poem: cleanPoem(text.slice(closeAt + CLOSE.length)) };
   }
 
-  // Still inside the scratchpad, or the tag is still arriving token by token.
-  if (text.startsWith(OPEN) || (text.length > 0 && OPEN.startsWith(text))) {
-    return { planning: true, notes: text.slice(OPEN.length).trim(), poem: '' };
+  // The opening tag is still arriving token by token.
+  if (text.length > 0 && OPEN.startsWith(text)) return { planning: true, notes: '', poem: '' };
+
+  if (text.startsWith(OPEN)) {
+    const body = text.slice(OPEN.length).trimStart();
+    const newlineAt = body.indexOf('\n');
+    const rest = newlineAt >= 0 ? body.slice(newlineAt + 1).trimStart() : '';
+    // Still planning: the plan is one line, and the closing tag may be arriving.
+    if (newlineAt < 0 || CLOSE.startsWith(rest)) {
+      return { planning: true, notes: (newlineAt < 0 ? body : body.slice(0, newlineAt)).trim(), poem: '' };
+    }
+    // Small models sometimes move on without closing the tag: after the plan line, it's the poem.
+    return { planning: false, notes: body.slice(0, newlineAt).trim(), poem: cleanPoem(rest) };
   }
 
   // The model skipped the scratchpad: everything is poem.
