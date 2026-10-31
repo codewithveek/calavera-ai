@@ -5,10 +5,10 @@ import { createThrottle } from '@/shared/lib/batcher';
 import { toErrorMessage, UserFacingError } from '@/shared/lib/errors';
 import { formatBytes } from '@/shared/lib/format';
 import { createRateMeter } from '@/shared/lib/rate';
-import { queryClient } from '@/shared/query/queryClient';
 
 import { downloadActions } from './downloadStore';
 import { startFileDownload, verifyAndInstall, type FileDownload } from './downloader';
+import { refreshModelQueries } from './packLifecycle';
 import type { ModelFile, ModelPackId } from './registry';
 import { useModelSettings } from './settingsStore';
 import { readPackStatus } from './status';
@@ -26,10 +26,6 @@ const PROGRESS_INTERVAL_MS = 250;
 let running = false;
 let stopRequested = false;
 let active: { download: FileDownload; file: ModelFile } | null = null;
-
-function refreshStatus() {
-  return queryClient.invalidateQueries({ queryKey: ['models'] });
-}
 
 async function downloadOne(file: ModelFile): Promise<boolean> {
   const settings = useModelSettings.getState();
@@ -88,7 +84,7 @@ export async function downloadPack(packId: ModelPackId): Promise<boolean> {
       useModelSettings.getState().clearPausedDownload(file.id);
       downloadActions.setPhase('verifying');
       await verifyAndInstall(file);
-      await refreshStatus();
+      await refreshModelQueries();
       downloadActions.setPhase('downloading');
     }
 
@@ -101,7 +97,7 @@ export async function downloadPack(packId: ModelPackId): Promise<boolean> {
     running = false;
     downloadActions.setCurrentFile(null);
     deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => undefined);
-    await refreshStatus();
+    await refreshModelQueries();
   }
 }
 
