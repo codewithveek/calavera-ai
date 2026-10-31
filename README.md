@@ -14,7 +14,7 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 
 ```
  📷 Soul Mirror ──────────┐        (Input layer)
-   SmolVLM / Gemma 4 vision│  photo → 512px → grammar-constrained JSON → cultural placement
+   SmolVLM / Gemma 4 vision│  photo → 512px → name + one sentence → cultural placement
                            ▼
  📜 Memory Archive ── sqlite-vec (Storage layer)
    all-MiniLM-L6-v2        │  text → sentence chunks → 384-d vectors → partitioned KNN index
@@ -50,7 +50,7 @@ The app reads the device's RAM and recommends a pack. You can switch packs later
 - **mmap, not malloc.** Weights are memory-mapped (`use_mmap`, no `mlock`), with a 2K context, a single sequence and 4 threads for the big cores.
 - **Prompts that cache.** The calaverita rules are an identical prefix on every request, so llama.cpp reuses their KV cache. Retrieved context is capped at ~1,100 characters to keep CPU prefill short.
 - **Small inputs.** Photos are downscaled to 512 px before vision inference (fewer image tokens, smaller thumbnails on disk). Image tokens are capped at 256.
-- **Grammar-constrained vision.** A JSON schema becomes a GBNF grammar, so even a 500M model always returns parseable output.
+- **No sampling grammar for vision.** We first forced JSON with a llama.cpp grammar (JSON schema → GBNF). On a weak CPU it cost ~4.7 s per token and a scan took over 10 minutes. The vision model now answers the way small models naturally do ("Candle. It has an orange flame."), which a forgiving, unit-tested parser reads; the same scan takes under 30 s. A repetition penalty stops small-model loops.
 - **Lean rendering.** React Compiler auto-memoisation, Hermes, the New Architecture, `inlineRequires` (modules load on first use), FlashList, `activityEnabled` screens, UI-thread Reanimated candles that respect *reduce motion*, and a progress bar driven by `scaleX` (no layout passes).
 - **Less native code.** Optional expo-router dependencies the app never uses (gesture-handler and masked-view, needed only by the JS stack and drawer) are excluded from autolinking in `package.json`. llama.rn's Snapdragon Hexagon/OpenCL build and HTP blobs (~16 MB, unused because inference is CPU-only) are left out of the APK by `plugins/withCpuOnlyLlama.js`. The APK ships only arm64-v8a and x86_64, the two ABIs llama.cpp supports.
 - **SQLite tuned.** WAL, `synchronous=NORMAL`, indexed foreign keys, and a vec0 table partitioned by ancestor so per-person KNN scans only their memories.

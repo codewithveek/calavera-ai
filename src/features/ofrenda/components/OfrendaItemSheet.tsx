@@ -29,7 +29,7 @@ export function OfrendaItemSheet({ item, onClose }: OfrendaItemSheetProps) {
           <AppText tone="accent">
             {TIERS[item.tier].name} · {TIERS[item.tier].english} · for {item.profileName}
           </AppText>
-          <AppText tone="muted">{item.description}</AppText>
+          {item.description ? <AppText tone="muted">{item.description}</AppText> : null}
           <AppText>{item.meaning}</AppText>
           <View style={styles.actions}>
             <Button

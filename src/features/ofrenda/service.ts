@@ -21,10 +21,13 @@ export interface SaveHeirloomInput {
  * archive, so the Verse Engine can later weave it into a calaverita.
  */
 export async function saveHeirloom(pack: ModelPack, { profileId, analysis, note }: SaveHeirloomInput): Promise<number> {
-  const story = note.trim();
-  const body =
-    `Heirloom on the ofrenda (${TIERS[analysis.tier].name} tier): ${analysis.objectName}. ${analysis.description}` +
-    (story ? ` ${story}` : '');
+  const body = [
+    `Heirloom on the ofrenda (${TIERS[analysis.tier].name} tier): ${analysis.objectName}.`,
+    analysis.description,
+    note.trim(),
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   // Embed before opening the transaction: inference must not hold a write lock.
   const prepared = await prepareMemory(pack, { profileId, source: 'heirloom', body });

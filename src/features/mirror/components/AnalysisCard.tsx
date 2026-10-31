@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 
 import { TIERS } from '@/features/ofrenda/tiers';
+import { formatDuration } from '@/shared/lib/format';
 import { colors, radii, spacing } from '@/shared/theme/tokens';
 import { AppText } from '@/shared/ui/AppText';
 import { Card } from '@/shared/ui/Card';
@@ -21,11 +22,12 @@ export function AnalysisCard({ analysis }: { analysis: HeirloomAnalysis }) {
             {analysis.spanishName}
           </AppText>
           <AppText variant="caption" tone="muted">
-            Seen on-device in {analysis.seconds.toFixed(1)}s
+            Seen on-device in{' '}
+            {analysis.seconds < 60 ? `${analysis.seconds.toFixed(1)}s` : formatDuration(analysis.seconds)}
           </AppText>
         </View>
       </View>
-      <AppText tone="muted">{analysis.description}</AppText>
+      {analysis.description ? <AppText tone="muted">{analysis.description}</AppText> : null}
       <View style={styles.tier}>
         <AppText variant="label">
           Place it on the {tier.name} tier ({tier.english})

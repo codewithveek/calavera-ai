@@ -1,7 +1,8 @@
 import { trackCompletion, withVisionModel } from '@/features/engine/contextManager';
 import type { ModelPack } from '@/features/models/registry';
 import { placeOnOfrenda, type Placement } from '@/features/ofrenda/placement';
-import { UserFacingError } from '@/shared/lib/errors';
+
+import { parseAnalysis } from './parseAnalysis';
 
 export interface HeirloomAnalysis extends Placement {
   objectName: string;
@@ -12,39 +13,14 @@ export interface HeirloomAnalysis extends Placement {
 }
 
 /**
- * Grammar-constrained output: llama.cpp converts this schema into a GBNF
- * grammar, so even a 500M vision model can only emit valid JSON.
+ * Asks for the shape small vision models answer in naturally ("Candle. It has
+ * an orange flame.") and parses it forgivingly (see parseAnalysis). No JSON
+ * schema grammar: on a low-end CPU, grammar-constrained sampling took ~4.7 s
+ * per token and a scan over 10 minutes; plain sampling scans in under a minute.
  */
-const RESPONSE_SCHEMA = {
-  type: 'object',
-  properties: {
-    object: { type: 'string', minLength: 2, maxLength: 40 },
-    description: { type: 'string', minLength: 8, maxLength: 180 },
-  },
-  required: ['object', 'description'],
-};
-
 const PROMPT =
-  'This photo shows something a family wants to place on a Día de los Muertos ofrenda (altar). ' +
-  'Identify the single main object. Answer in English as JSON with "object" (1 to 4 words naming it) ' +
-  'and "description" (one sentence describing how it looks).';
-
-function tidy(text: string): string {
-  const trimmed = text.replace(/\s+/g, ' ').trim();
-  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-}
-
-function parseResponse(raw: string): { object: string; description: string } {
-  try {
-    const json = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)) as Record<string, unknown>;
-    const object = typeof json.object === 'string' ? tidy(json.object) : '';
-    const description = typeof json.description === 'string' ? tidy(json.description) : '';
-    if (object) return { object, description: description || object };
-  } catch {
-    // fall through to the user-facing error below
-  }
-  throw new UserFacingError('The mirror could not make out the object. Try a closer, brighter photo.');
-}
+  'What is the main object in this photo? A family wants to place it on a Día de los Muertos ofrenda. ' +
+  'Answer in English with its name (1 to 4 words), then one sentence describing how it looks.';
 
 /** The Input Layer: a local vision-language model reads the heirloom photo. */
 export async function analyzeHeirloom(pack: ModelPack, imageUri: string): Promise<HeirloomAnalysis> {
@@ -64,17 +40,19 @@ export async function analyzeHeirloom(pack: ModelPack, imageUri: string): Promis
             ],
           },
         ],
-        response_format: { type: 'json_schema', json_schema: { strict: true, schema: RESPONSE_SCHEMA } },
         enable_thinking: false,
-        n_predict: 128,
+        n_predict: 64,
         temperature: 0.2,
         top_p: 0.9,
+        // Small vision models fall into loops ("con un poder de vivir, con un poder de vivir…").
+        penalty_repeat: 1.15,
+        penalty_last_n: 64,
       });
       return result.content || result.text;
     }),
   );
 
-  const { object, description } = parseResponse(raw);
+  const { object, description } = parseAnalysis(raw);
   return {
     objectName: object,
     description,
