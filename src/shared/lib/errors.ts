@@ -6,9 +6,10 @@ export class UserFacingError extends Error {
   }
 }
 
-export function toErrorMessage(error: unknown, fallback = 'Something went wrong.'): string {
-  if (error instanceof UserFacingError) return error.message;
-  if (error instanceof Error && error.message) return error.message;
-  if (typeof error === 'string' && error) return error;
-  return fallback;
+/**
+ * Only messages written for people are shown. Anything else (database,
+ * download or native errors) is technical, so the friendly fallback is used.
+ */
+export function toErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.'): string {
+  return error instanceof UserFacingError ? error.message : fallback;
 }
