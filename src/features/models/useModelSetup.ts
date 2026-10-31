@@ -17,7 +17,6 @@ import { useModelSettings } from './settingsStore';
 export function useModelSetup() {
   const router = useRouter();
   const activePackId = useModelSettings((state) => state.selectedPackId);
-  const hasPausedDownload = useModelSettings((state) => Object.keys(state.pausedDownloads).length > 0);
   const { data: device } = useDeviceProfile();
   const [viewedPackId, setViewedPackId] = useState<ModelPackId | null>(null);
 
@@ -29,7 +28,9 @@ export function useModelSetup() {
   const error = useDownloadStore((state) => state.error);
   const isBusy = phase === 'downloading' || phase === 'verifying';
   const isActive = activePackId === packId;
-  const canResume = phase === 'paused' || (phase === 'idle' && hasPausedDownload);
+  // A `.part` on disk means a paused or interrupted download (the app may have been killed).
+  const hasPartialFile = status?.files.some((file) => file.partialBytes > 0) ?? false;
+  const canResume = phase === 'paused' || (phase === 'idle' && hasPartialFile);
   const isReady = status?.ready ?? false;
 
   const enterAltar = () => router.replace('/');
