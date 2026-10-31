@@ -34,3 +34,13 @@ export function bytesToGiB(bytes: number): number {
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }
+
+/** "Abuela Rosa Núñez" → "abuela-rosa-nunez": ASCII, lowercase, hyphenated (file names). */
+export function slugify(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}

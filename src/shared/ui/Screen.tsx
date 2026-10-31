@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useRef, type ComponentRef, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
@@ -12,18 +12,31 @@ interface ScreenProps {
   edges?: Edge[];
   contentStyle?: ViewStyle;
   footer?: ReactNode;
+  /** Keeps the end of the content in view as it grows, e.g. while a poem streams in. */
+  followContent?: boolean;
 }
 
-export function Screen({ children, scroll = true, edges = ['bottom'], contentStyle, footer }: ScreenProps) {
+export function Screen({
+  children,
+  scroll = true,
+  edges = ['bottom'],
+  contentStyle,
+  footer,
+  followContent = false,
+}: ScreenProps) {
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+
   return (
     <SafeAreaView style={styles.root} edges={edges}>
       {/* Per Expo's guidance, Android needs no behavior; iOS needs padding. */}
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {scroll ? (
           <ScrollView
+            ref={scrollRef}
             style={styles.flex}
             contentContainerStyle={[styles.content, contentStyle]}
             keyboardShouldPersistTaps="handled"
+            onContentSizeChange={followContent ? () => scrollRef.current?.scrollToEnd({ animated: true }) : undefined}
           >
             {children}
           </ScrollView>

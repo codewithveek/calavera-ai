@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useRef, type ComponentRef } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 
+import { useGoBack } from '@/shared/hooks/useGoBack';
 import { toErrorMessage } from '@/shared/lib/errors';
 import { haptics } from '@/shared/lib/haptics';
 import { spacing } from '@/shared/theme/tokens';
@@ -30,17 +31,18 @@ export function TributeScreen({ tributeId }: { tributeId: number }) {
 
 function TributeView({ tribute }: { tribute: Tribute }) {
   const router = useRouter();
+  const goBack = useGoBack();
   const cardRef = useRef<ComponentRef<typeof View>>(null);
   const recitation = useRecitation(tribute.poem);
-  const share = useMutation({ mutationFn: () => shareCard(cardRef, `Calaverita para ${tribute.profileName}`) });
-  const save = useMutation({ mutationFn: () => saveCardToGallery(cardRef), onSuccess: haptics.success });
+  const share = useMutation({ mutationFn: () => shareCard(cardRef, tribute.profileName) });
+  const save = useMutation({ mutationFn: () => saveCardToGallery(cardRef, tribute.profileName), onSuccess: haptics.success });
   const remove = useDeleteTribute();
   const exportError = share.error ?? save.error;
 
   const confirmDelete = () =>
     Alert.alert('Delete this calaverita?', 'The poem will be removed from this phone.', [
       { text: 'Keep', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => remove.mutate(tribute.id, { onSuccess: () => router.back() }) },
+      { text: 'Delete', style: 'destructive', onPress: () => remove.mutate(tribute.id, { onSuccess: goBack }) },
     ]);
 
   return (

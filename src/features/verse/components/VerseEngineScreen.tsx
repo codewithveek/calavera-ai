@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { ProfilePicker } from '@/features/profiles/components/ProfilePicker';
+import { useResolvedProfileId } from '@/features/profiles/hooks';
 import { AppText } from '@/shared/ui/AppText';
 import { Button } from '@/shared/ui/Button';
 import { Screen } from '@/shared/ui/Screen';
@@ -15,7 +16,8 @@ import { ToneSlider } from './ToneSlider';
 
 /** Screen 5: choose a loved one and a tone; RAG + on-device LLM write the calaverita. */
 export function VerseEngineScreen({ initialProfileId }: { initialProfileId: number | null }) {
-  const [profileId, setProfileId] = useState<number | null>(initialProfileId);
+  const [chosenProfileId, setProfileId] = useState<number | null>(initialProfileId);
+  const profileId = useResolvedProfileId(chosenProfileId);
   const [toneLevel, setToneLevel] = useState(DEFAULT_TONE_LEVEL);
   const [figureId, setFigureId] = useState<DeathFigureId>('catrina');
   const [focus, setFocus] = useState('');
@@ -37,7 +39,7 @@ export function VerseEngineScreen({ initialProfileId }: { initialProfileId: numb
   );
 
   return (
-    <Screen footer={footer}>
+    <Screen footer={footer} followContent={isGenerating}>
       <AppText tone="muted">
         A calaverita literaria is a playful Day of the Dead poem in which Death comes for someone we love. Yours is
         written here, offline, from the memories in your archive.

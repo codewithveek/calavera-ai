@@ -14,8 +14,9 @@ export function ModelLoadingNotice() {
 
   return (
     <View style={styles.notice} accessibilityLiveRegion="polite">
+      {/* llama.cpp maps the whole file before reporting tensor progress, so 0% would look stuck. */}
       <AppText variant="label">
-        Waking {loading.label}… {formatPercent(loading.progress)}
+        Waking {loading.label}…{loading.progress > 0 ? ` ${formatPercent(loading.progress)}` : ''}
       </AppText>
       <ProgressBar progress={loading.progress} color={colors.turquoise} accessibilityLabel="Model loading" />
       <AppText variant="caption" tone="muted">

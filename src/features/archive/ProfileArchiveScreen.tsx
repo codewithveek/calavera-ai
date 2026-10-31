@@ -7,6 +7,7 @@ import { MemoryRow } from '@/features/memories/components/MemoryRow';
 import { useDeleteMemory, useMemories } from '@/features/memories/hooks';
 import { useDeleteProfile, useProfile } from '@/features/profiles/hooks';
 import { TributeList } from '@/features/tributes/components/TributeList';
+import { useGoBack } from '@/shared/hooks/useGoBack';
 import { toErrorMessage } from '@/shared/lib/errors';
 import { colors, spacing } from '@/shared/theme/tokens';
 import { AppText } from '@/shared/ui/AppText';
@@ -16,6 +17,7 @@ import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/States';
 /** Screen 4 (detail): one loved one's memories, tributes and the composer that feeds the vector store. */
 export function ProfileArchiveScreen({ profileId }: { profileId: number }) {
   const router = useRouter();
+  const goBack = useGoBack('/archive');
   const profile = useProfile(profileId);
   const memories = useMemories(profileId);
   const deleteMemory = useDeleteMemory();
@@ -34,7 +36,7 @@ export function ProfileArchiveScreen({ profileId }: { profileId: number }) {
       {
         text: 'Remove',
         style: 'destructive',
-        onPress: () => deleteProfile.mutate(person.id, { onSuccess: () => router.back() }),
+        onPress: () => deleteProfile.mutate(person.id, { onSuccess: goBack }),
       },
     ]);
 

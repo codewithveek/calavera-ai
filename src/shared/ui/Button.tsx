@@ -47,16 +47,16 @@ export function Button({
         inactive && styles.disabled,
       ]}
     >
+      {/* The label stays laid out (just invisible) while loading, so the button never changes size. */}
+      <View style={[styles.content, loading && styles.hidden]}>
+        {icon ? <AppText style={styles.icon}>{icon}</AppText> : null}
+        <AppText variant="label" style={variant === 'primary' ? styles.primaryLabel : undefined}>
+          {label}
+        </AppText>
+      </View>
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.night : colors.bone} />
-      ) : (
-        <View style={styles.content}>
-          {icon ? <AppText style={styles.icon}>{icon}</AppText> : null}
-          <AppText variant="label" style={variant === 'primary' ? styles.primaryLabel : undefined}>
-            {label}
-          </AppText>
-        </View>
-      )}
+        <ActivityIndicator style={StyleSheet.absoluteFill} color={variant === 'primary' ? colors.night : colors.bone} />
+      ) : null}
     </Pressable>
   );
 }
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  hidden: { opacity: 0 },
   icon: { fontSize: 18 },
   fullWidth: { alignSelf: 'stretch' },
   pressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },

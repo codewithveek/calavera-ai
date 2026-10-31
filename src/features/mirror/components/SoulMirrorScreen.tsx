@@ -1,11 +1,12 @@
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ModelLoadingNotice } from '@/features/engine/ModelLoadingNotice';
 import { useSaveHeirloom } from '@/features/ofrenda/hooks';
 import { ProfilePicker } from '@/features/profiles/components/ProfilePicker';
+import { useResolvedProfileId } from '@/features/profiles/hooks';
+import { useGoBack } from '@/shared/hooks/useGoBack';
 import { toErrorMessage } from '@/shared/lib/errors';
 import { haptics } from '@/shared/lib/haptics';
 import { colors, radii, spacing } from '@/shared/theme/tokens';
@@ -64,9 +65,10 @@ export function SoulMirrorScreen() {
 }
 
 function PlacementForm({ analysis, onRetake }: { analysis: HeirloomAnalysis; onRetake: () => void }) {
-  const router = useRouter();
+  const goBack = useGoBack();
   const save = useSaveHeirloom();
-  const [profileId, setProfileId] = useState<number | null>(null);
+  const [chosenProfileId, setProfileId] = useState<number | null>(null);
+  const profileId = useResolvedProfileId(chosenProfileId);
   const [note, setNote] = useState('');
 
   const submit = () => {
@@ -76,7 +78,7 @@ function PlacementForm({ analysis, onRetake }: { analysis: HeirloomAnalysis; onR
       {
         onSuccess: () => {
           haptics.success();
-          router.back();
+          goBack();
         },
       },
     );
@@ -106,7 +108,7 @@ function PlacementForm({ analysis, onRetake }: { analysis: HeirloomAnalysis; onR
         value={note}
         onChangeText={setNote}
         multiline
-        placeholder="He wore this hat to every family wedding…"
+        placeholder="They wore this hat to every family wedding…"
         hint="Saved to the memory archive so the Verse Engine can use it."
       />
       {save.isError ? <AppText tone="danger">{toErrorMessage(save.error)}</AppText> : null}

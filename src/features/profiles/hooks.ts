@@ -10,6 +10,13 @@ export function useProfiles() {
   return useQuery({ queryKey: queryKeys.profiles, queryFn: listProfiles });
 }
 
+/** The user's choice, or the only loved one when the choice is unambiguous. */
+export function useResolvedProfileId(chosenId: number | null): number | null {
+  const { data: profiles } = useProfiles();
+  if (chosenId !== null) return chosenId;
+  return profiles?.length === 1 ? (profiles[0]?.id ?? null) : null;
+}
+
 export function useProfile(id: number) {
   return useQuery({ queryKey: queryKeys.profile(id), queryFn: () => getProfile(id) });
 }
