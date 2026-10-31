@@ -32,7 +32,7 @@ export function MemoryComposer({ profileId, name }: { profileId: number; name: s
         value={body}
         onChangeText={setBody}
         multiline
-        placeholder="Every Sunday he burned the tortillas and blamed the stove…"
+        placeholder="Every Sunday they burned the tortillas and blamed the stove…"
         hint="Tip: use your keyboard's microphone to dictate a spoken recollection."
       />
       <ModelLoadingNotice />

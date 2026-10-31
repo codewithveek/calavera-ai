@@ -54,14 +54,14 @@ export function Candle({ height, phaseMs = 0 }: CandleProps) {
 
 const styles = StyleSheet.create({
   candle: { alignItems: 'center', justifyContent: 'flex-end' },
+  // Static (not animated) so the blurred shadow is rasterised once, not on every flicker frame.
   glow: {
     position: 'absolute',
-    top: -10,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.candle,
-    opacity: 0.12,
+    top: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    boxShadow: `0 0 16px 7px ${colors.candle}55`,
   },
   flame: {
     width: 10,
@@ -73,6 +73,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.candle,
     transformOrigin: 'bottom',
   },
-  wick: { width: 2, height: 4, backgroundColor: colors.nightSunken },
+  wick: { width: 2, height: 4, backgroundColor: colors.parchmentInk },
   body: { width: 16, borderRadius: 3, backgroundColor: colors.bone },
 });
