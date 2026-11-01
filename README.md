@@ -33,6 +33,7 @@ Ancestral memories are private. Every model in Calavera AI runs on the phone's o
 | **4. Memory Archive** | Stories are chunked, embedded and stored in sqlite-vec. *Ask the archive* runs semantic search by meaning. |
 | **5. Calaveritas** | Pick a loved one, a language (Spanish, English, or the Spanish original with an English translation), a tone (tender ↔ satirical) and a death figure. Retrieved memories ground a streamed poem; the translation streams in as a second pass. |
 | **6. Tribute** | Bilingual parchment card, recitation in a Mexican Spanish and/or English voice (system TTS), share or save as PNG, and a per-line rhythm check (Spanish métrica with sinalefa, or an English syllable estimate). |
+| **7. Backup & restore** | One `.calavera` file with loved ones, memories, heirloom photos and calaveritas: AES-256-GCM with a PBKDF2-SHA256 (600k) key from a passphrase that never leaves the phone. Send it anywhere, restore on any phone (no duplicates), or share a single loved one with family. |
 
 ## Models (all open weights, GGUF via llama.cpp)
 
@@ -74,7 +75,7 @@ src/
     tributes/          card, recitation, export, meter analysis
   shared/              theme tokens, UI primitives, query client and keys, utilities
 plugins/               Expo config plugins (Windows native build fix, CPU-only llama.rn packaging)
-modules/               Local Expo module: system-downloads (Android DownloadManager bridge)
+modules/               Local Expo modules: system-downloads (Android DownloadManager), passphrase-key (PBKDF2)
 ```
 
 State management: **TanStack Query** for everything read from SQLite or disk (with `networkMode: 'always'`, so it works in airplane mode). **zustand** for download progress, model loading and the streaming poem session. Model settings are persisted through expo-sqlite's synchronous key-value store.
