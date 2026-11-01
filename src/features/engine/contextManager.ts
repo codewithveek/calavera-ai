@@ -46,6 +46,9 @@ async function initWithProgress(file: ModelFile, label: string, params: typeof G
   } catch (error) {
     engineActions.failed();
     throw new UserFacingError(`Could not wake ${label}. Close other apps and try again.`, { cause: error });
+  } finally {
+    // A throttled progress update firing after loading ends would bring the "Waking…" notice back.
+    progress.cancel();
   }
 }
 

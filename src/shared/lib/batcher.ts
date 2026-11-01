@@ -57,5 +57,11 @@ export function createThrottle<T>(emit: (value: T) => void, intervalMs: number) 
       if (timer) clearTimeout(timer);
       fire();
     },
+    /** Drops a pending value, so nothing is emitted after the caller is done. */
+    cancel() {
+      if (timer) clearTimeout(timer);
+      timer = null;
+      pending = null;
+    },
   };
 }
