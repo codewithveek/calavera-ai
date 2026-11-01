@@ -1,3 +1,5 @@
+import type { SQLiteDatabase } from 'expo-sqlite';
+
 import { getDatabase } from '@/db/database';
 
 import type { VerseLanguage } from '@/features/verse/languages';
@@ -42,9 +44,13 @@ const toTribute = (row: TributeRow): Tribute => ({
   createdAt: row.created_at,
 });
 
-export async function insertTribute(tribute: NewTribute): Promise<number> {
-  const db = await getDatabase();
-  const result = await db.runAsync(
+/** `db` lets a restore write inside its transaction. */
+export async function insertTribute(
+  tribute: NewTribute & { createdAt?: number },
+  db?: SQLiteDatabase,
+): Promise<number> {
+  const target = db ?? (await getDatabase());
+  const result = await target.runAsync(
     `INSERT INTO tributes (profile_id, tone, figure, poem, language, translation, model_label, tokens_per_second, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     tribute.profileId,
@@ -55,7 +61,7 @@ export async function insertTribute(tribute: NewTribute): Promise<number> {
     tribute.translation,
     tribute.modelLabel,
     tribute.tokensPerSecond,
-    Date.now(),
+    tribute.createdAt ?? Date.now(),
   );
   return result.lastInsertRowId;
 }

@@ -40,6 +40,7 @@ function RootNavigator() {
         <Stack.Screen name="archive/[profileId]" options={{ title: '' }} />
         <Stack.Screen name="verse" options={{ title: 'Calaveritas' }} />
         <Stack.Screen name="tribute/[tributeId]" options={{ title: 'Tribute' }} />
+        <Stack.Screen name="backup" options={{ title: 'Backup & restore' }} />
       </Stack.Protected>
       <Stack.Screen name="models" options={{ title: 'Offline AI', headerShown: ready }} />
     </Stack>

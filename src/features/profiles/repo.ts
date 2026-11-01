@@ -1,3 +1,5 @@
+import type { SQLiteDatabase } from 'expo-sqlite';
+
 import { getDatabase, withTransaction } from '@/db/database';
 
 import type { Profile, ProfileDraft, ProfileSummary } from './types';
@@ -43,15 +45,19 @@ export async function getProfile(id: number): Promise<Profile | null> {
   return row ? toProfile(row) : null;
 }
 
-export async function createProfile(draft: ProfileDraft): Promise<number> {
-  const db = await getDatabase();
-  const result = await db.runAsync(
+/** `db` lets a restore write inside its transaction. */
+export async function createProfile(
+  draft: ProfileDraft & { createdAt?: number },
+  db?: SQLiteDatabase,
+): Promise<number> {
+  const target = db ?? (await getDatabase());
+  const result = await target.runAsync(
     'INSERT INTO profiles (name, relation, life_span, essence, created_at) VALUES (?, ?, ?, ?, ?)',
     draft.name.trim(),
     draft.relation.trim(),
     draft.lifeSpan.trim(),
     draft.essence.trim(),
-    Date.now(),
+    draft.createdAt ?? Date.now(),
   );
   return result.lastInsertRowId;
 }

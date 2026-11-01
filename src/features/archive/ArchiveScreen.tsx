@@ -49,6 +49,7 @@ export function ArchiveScreen() {
             ) : (
               <Button label="Remember someone new" icon="🌼" variant="secondary" onPress={() => setFormOpen(true)} />
             )}
+            <Button label="Backup & restore" icon="🔐" variant="ghost" onPress={() => router.push('/backup')} />
             {profiles.data.length > 0 ? (
               <AppText variant="label" tone="muted">
                 YOUR LOVED ONES

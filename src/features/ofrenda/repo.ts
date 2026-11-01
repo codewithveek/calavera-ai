@@ -20,12 +20,14 @@ interface OfrendaRow {
 
 export interface NewOfrendaItem {
   profileId: number;
-  memoryId: number;
+  memoryId: number | null;
   name: string;
   description: string;
   tier: OfrendaTier;
   meaning: string;
   imageUri: string;
+  /** Original date when restoring a backup; now otherwise. */
+  createdAt?: number;
 }
 
 export async function insertOfrendaItem(txn: SQLiteDatabase, item: NewOfrendaItem): Promise<number> {
@@ -39,7 +41,7 @@ export async function insertOfrendaItem(txn: SQLiteDatabase, item: NewOfrendaIte
     item.tier,
     item.meaning,
     item.imageUri,
-    Date.now(),
+    item.createdAt ?? Date.now(),
   );
   return result.lastInsertRowId;
 }

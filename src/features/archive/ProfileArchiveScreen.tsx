@@ -62,6 +62,12 @@ export function ProfileArchiveScreen({ profileId }: { profileId: number }) {
               icon="💀"
               onPress={() => router.push({ pathname: '/verse', params: { profileId: String(person.id) } })}
             />
+            <Button
+              label={`Share ${person.name} with family`}
+              icon="🔐"
+              variant="secondary"
+              onPress={() => router.push({ pathname: '/backup', params: { profileId: String(person.id) } })}
+            />
             <TributeList profileId={person.id} />
             <MemoryComposer profileId={person.id} name={person.name} />
             <AppText variant="label" tone="muted">

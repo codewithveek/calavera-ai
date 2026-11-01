@@ -35,6 +35,8 @@ export interface NewMemory {
   body: string;
   chunks: readonly string[];
   vectors: readonly Float32Array[];
+  /** Original date when restoring a backup; now otherwise. */
+  createdAt?: number;
 }
 
 /**
@@ -48,7 +50,7 @@ export async function insertMemory(txn: SQLiteDatabase, memory: NewMemory): Prom
     memory.profileId,
     memory.source,
     memory.body,
-    Date.now(),
+    memory.createdAt ?? Date.now(),
   );
 
   for (let index = 0; index < memory.chunks.length; index++) {
