@@ -3,13 +3,14 @@
     "name": "Calavera AI",
     "slug": "calavera-ai",
     "scheme": "calavera",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#120D1A",
     "android": {
       "package": "dev.calavera.ai",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#120D1A",
         "foregroundImage": "./assets/android-icon-foreground.png",
