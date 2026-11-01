@@ -35,13 +35,11 @@ Memories aren't data in the usual sense. They're how we feel about someone: the 
 
 ## Demo
 
-> **TODO before publishing:** upload `calavera.mp4` to YouTube (or Loom) and put its link in the embed below.
-
-{% embed TODO-VIDEO-URL %}
+> **TODO before publishing:** upload `calavera.mp4` to YouTube (or Loom) and replace this note with an embed of its link.
 
 The video is built from screenshots of the real app running on an Android emulator. Its voiceover is AI-generated with **ElevenLabs** text-to-speech: that's the only part of this project that used a cloud service. The app itself never does.
 
-**Try it:** install the Android APK from the [v1.0.0 release](https://github.com/codewithveek/calavera-ai/releases/tag/v1.0.0) (arm64, 103 MB). On first launch it recommends a model pack for your phone and downloads it (about 2.1 GB for the Lite pack, so use Wi-Fi). There is no login. A good test path:
+**Try it:** install the Android APK from the [v1.0.1 release](https://github.com/codewithveek/calavera-ai/releases/tag/v1.0.1) (arm64, 103 MB). On first launch it recommends a model pack for your phone and downloads it (about 2.1 GB for the Lite pack, so use Wi-Fi). There is no login. A good test path:
 
 1. **Archive → Remember someone**: add a person and a couple of stories.
 2. **Soul Mirror**: photograph or pick a picture of an object (a candle works well) and place it on the altar.
