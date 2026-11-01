@@ -5,7 +5,7 @@ node_modules/
 
 # private planning notes
 Calavera_AI_Project_Masterplan.md
-
+.env
 # Expo
 .expo/
 dist/
