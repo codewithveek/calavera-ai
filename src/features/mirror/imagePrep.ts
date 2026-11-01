@@ -14,6 +14,16 @@ export interface PreparedImage {
   height: number;
 }
 
+/**
+ * Where the scan waits while the model looks at it and the user decides. Not the cache: on a phone
+ * short of space Android empties the cache, and a slow analysis gives it minutes to do so.
+ */
+function scanDirectory(): Directory {
+  const directory = new Directory(Paths.document, 'scans');
+  if (!directory.exists) directory.create({ intermediates: true, idempotent: true });
+  return directory;
+}
+
 export async function prepareForVision(source: PreparedImage): Promise<PreparedImage> {
   const landscape = source.width >= source.height;
   const resize = landscape ? { width: TARGET_LONG_EDGE } : { height: TARGET_LONG_EDGE };
@@ -25,7 +35,13 @@ export async function prepareForVision(source: PreparedImage): Promise<PreparedI
   const saved = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.85 });
   rendered.release();
   context.release();
-  return { uri: saved.uri, width: saved.width, height: saved.height };
+
+  // One scan is in flight at a time, so anything left here is a scan the user walked away from.
+  const directory = scanDirectory();
+  for (const entry of directory.list()) entry.delete();
+  const scan = new File(saved.uri);
+  scan.moveSync(new File(directory, `scan-${Date.now()}.jpg`));
+  return { uri: scan.uri, width: saved.width, height: saved.height };
 }
 
 function ofrendaPhotoFile(): File {
@@ -34,11 +50,11 @@ function ofrendaPhotoFile(): File {
   return new File(directory, `heirloom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`);
 }
 
-/** Moves a scan out of the evictable cache once the user keeps it. */
-export function persistOfrendaImage(cacheUri: string): string {
+/** Copies a scan onto the ofrenda once the user keeps it; the scan stays put so a failed save can be retried. */
+export function persistOfrendaImage(scanUri: string): string {
   const target = ofrendaPhotoFile();
   // Sync: `copy()` is async in this SDK, and the caller stores the path right away.
-  new File(cacheUri).copySync(target);
+  new File(scanUri).copySync(target);
   return target.uri;
 }
 
