@@ -4,7 +4,7 @@ import type { ModelPack } from '@/features/models/registry';
 import { UserFacingError } from '@/shared/lib/errors';
 
 import { chunkText } from './chunker';
-import { insertMemory, searchMemories } from './repo';
+import { insertMemory, listStaleChunks, replaceStaleVectors, searchMemories } from './repo';
 import type { MemoryMatch, MemorySource } from './types';
 
 export interface PreparedMemory {
@@ -36,11 +36,23 @@ export async function addMemory(
   return withTransaction((db) => insertMemory(db, prepared));
 }
 
+/** Re-embeds chunks saved before the embedding fix, once; a no-op afterwards. */
+async function refreshStaleVectors(pack: ModelPack): Promise<void> {
+  const stale = await listStaleChunks();
+  if (stale.length === 0) return;
+  const vectors = await embedTexts(
+    pack,
+    stale.map((chunk) => chunk.content),
+  );
+  await replaceStaleVectors(stale, vectors);
+}
+
 export async function findRelatedMemories(
   pack: ModelPack,
   query: string,
   options: { profileId: number | null; limit: number },
 ): Promise<MemoryMatch[]> {
+  await refreshStaleVectors(pack);
   const vector = await embedText(pack, query);
   return searchMemories(vector, options);
 }

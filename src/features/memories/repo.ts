@@ -82,6 +82,40 @@ export async function listMemories(profileId: number): Promise<Memory[]> {
   return rows.map(toMemory);
 }
 
+export interface StaleChunk {
+  id: number;
+  profileId: number;
+  content: string;
+}
+
+/** Chunks whose vectors predate the embedding fix (migration v3). */
+export async function listStaleChunks(): Promise<StaleChunk[]> {
+  const db = await getDatabase();
+  return db.getAllAsync<StaleChunk>(
+    `SELECT c.id, c.profile_id AS profileId, c.content
+     FROM stale_vectors s JOIN memory_chunks c ON c.id = s.chunk_id`,
+  );
+}
+
+/** Swaps in fresh vectors and clears the stale list, including chunks deleted since. */
+export function replaceStaleVectors(chunks: readonly StaleChunk[], vectors: readonly Float32Array[]): Promise<void> {
+  return withTransaction(async (db) => {
+    for (let index = 0; index < chunks.length; index++) {
+      const chunk = chunks[index];
+      const vector = vectors[index];
+      if (chunk === undefined || vector === undefined) continue;
+      await db.runAsync('DELETE FROM memory_vectors WHERE chunk_id = ?', chunk.id);
+      await db.runAsync(
+        'INSERT INTO memory_vectors (chunk_id, profile_id, embedding) VALUES (?, ?, ?)',
+        chunk.id,
+        chunk.profileId,
+        toVectorBlob(vector),
+      );
+    }
+    await db.runAsync('DELETE FROM stale_vectors');
+  });
+}
+
 export function deleteMemory(memoryId: number): Promise<void> {
   return withTransaction(async (db) => {
     const chunks = await db.getAllAsync<{ id: number }>('SELECT id FROM memory_chunks WHERE memory_id = ?', memoryId);

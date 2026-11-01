@@ -11,6 +11,9 @@ export function embedTexts(pack: ModelPack, texts: readonly string[]): Promise<F
   return withEmbedder(pack, async (context) => {
     const vectors: Float32Array[] = [];
     for (const text of texts) {
+      // llama.rn's embedding() empties the KV cache but keeps the previous prompt's tokens, so the
+      // next prompt skips its shared prefix and is pooled from a fragment. clearCache() resets both.
+      await context.clearCache(false);
       const { embedding } = await context.embedding(text.slice(0, MAX_EMBED_CHARS), {
         embd_normalize: L2_NORMALIZE,
       });

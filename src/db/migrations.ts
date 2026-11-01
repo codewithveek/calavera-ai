@@ -78,6 +78,14 @@ const MIGRATIONS: readonly Migration[] = [
       ALTER TABLE tributes ADD COLUMN translation TEXT;
     `);
   },
+  // v3: vectors written before the embedding fix were pooled from fragments of their text.
+  // Mark every chunk so the next search embeds it again (see refreshStaleVectors).
+  async (db) => {
+    await db.execAsync(`
+      CREATE TABLE stale_vectors (chunk_id INTEGER PRIMARY KEY);
+      INSERT INTO stale_vectors (chunk_id) SELECT id FROM memory_chunks;
+    `);
+  },
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {
