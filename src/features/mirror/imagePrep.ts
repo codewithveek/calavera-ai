@@ -28,12 +28,25 @@ export async function prepareForVision(source: PreparedImage): Promise<PreparedI
   return { uri: saved.uri, width: saved.width, height: saved.height };
 }
 
-/** Moves a scan out of the evictable cache once the user keeps it. */
-export function persistOfrendaImage(cacheUri: string): string {
+function ofrendaPhotoFile(): File {
   const directory = new Directory(Paths.document, 'ofrenda');
   if (!directory.exists) directory.create({ intermediates: true, idempotent: true });
-  const target = new File(directory, `heirloom-${Date.now()}.jpg`);
-  new File(cacheUri).copy(target);
+  return new File(directory, `heirloom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`);
+}
+
+/** Moves a scan out of the evictable cache once the user keeps it. */
+export function persistOfrendaImage(cacheUri: string): string {
+  const target = ofrendaPhotoFile();
+  // Sync: `copy()` is async in this SDK, and the caller stores the path right away.
+  new File(cacheUri).copySync(target);
+  return target.uri;
+}
+
+/** Writes a heirloom photo restored from a backup (base64 JPEG). */
+export async function saveOfrendaPhoto(base64: string): Promise<string> {
+  const target = ofrendaPhotoFile();
+  target.create();
+  await target.write(base64, { encoding: 'base64' });
   return target.uri;
 }
 

@@ -75,7 +75,7 @@ export function promotePartial(file: ModelFile): void {
   }
   const target = new File(privateDirectory(), file.fileName);
   if (target.exists) target.delete();
-  partialFileHandle(file).move(target);
+  partialFileHandle(file).moveSync(target);
 }
 
 /** llama.rn accepts `file://` URIs directly. */
